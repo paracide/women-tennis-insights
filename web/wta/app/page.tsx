@@ -6,6 +6,7 @@ import { button as buttonStyles } from "@heroui/theme";
 import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
+import MetabaseDashboard from "@/app/dashboard/metabase-dashboard";
 
 export default function Home() {
   return (
@@ -16,8 +17,9 @@ export default function Home() {
         <span className={title({ color: "violet" })}>women's tennis players</span>
         <br />
       </div>
-
-
+       <div className="inline-block text-center justify-center">
+        <MetabaseDashboard />
+      </div>
     </section>
   );
 }
