@@ -88,3 +88,17 @@ D	WTA 125 (also called WTA Challenger)	次级巡回赛，排名积分较低
 F	Fed Cup / Billie Jean King Cup	国家队之间的团体赛事
  注：WTA 在 2021 年对赛事等级进行了重新命名（如 WTA 1000、WTA 500、WTA 250），
  Jeff 的数据使用的是旧标签，但结构上可以映射。
+
+
+
+ players 数据集字段说明（来自 Jeff Sackmann 的 WTA 数据）
+列名	含义说明
+player_id	球员的唯一标识符（整数），用于在其他表中识别球员
+name_first	球员的名字（名）
+name_last	球员的姓氏
+hand	球员的持拍手：
+R = 右手，L = 左手，U = 不确定（unknown）
+dob	出生日期（Date of Birth），格式通常为 yyyy-mm-dd
+ioc	球员所属国家的奥委会国家代码（如：USA、CHN、CAN）
+height	身高（单位为厘米），可能有缺失
+wikidata_id	对应维基数据（Wikidata）的唯一 ID（如：Q123456），用于补充外部信息
