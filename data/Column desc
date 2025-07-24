@@ -1,0 +1,90 @@
+下面是 Jeff Sackmann 的 WTA match 数据集中各个列的英文含义简明解释
+
+---
+
+### 🎾 Tournament Information（赛事信息）
+
+| Column Name     | Meaning                                 |
+| --------------- | --------------------------------------- |
+| `tourney_id`    | Unique tournament ID                    |
+| `tourney_name`  | Name of the tournament                  |
+| `surface`       | Court surface (e.g., Hard, Clay, Grass) |
+| `draw_size`     | Number of players in the draw           |
+| `tourney_level` | Tournament level (e.g., G, P, I, D, F)  |
+| `tourney_date`  | Start date of the tournament (YYYYMMDD) |
+| `match_num`     | Match number within the tournament      |
+
+---
+
+### 🏆 Winner Info（获胜球员信息）
+
+| Column Name          | Meaning                                           |
+| -------------------- | ------------------------------------------------- |
+| `winner_id`          | Player ID of the winner                           |
+| `winner_seed`        | Seed number of the winner (if any)                |
+| `winner_entry`       | Entry method (e.g., WC = Wildcard, Q = Qualifier) |
+| `winner_name`        | Full name of the winner                           |
+| `winner_hand`        | Playing hand (R = Right, L = Left)                |
+| `winner_ht`          | Height in cm                                      |
+| `winner_ioc`         | Country code (IOC format)                         |
+| `winner_age`         | Age at the time of match                          |
+| `winner_rank`        | WTA ranking at the time                           |
+| `winner_rank_points` | WTA ranking points at the time                    |
+
+---
+
+### ❌ Loser Info（失利球员信息）
+
+| Column Name         | Meaning                           |
+| ------------------- | --------------------------------- |
+| `loser_id`          | Player ID of the loser            |
+| `loser_seed`        | Seed number of the loser (if any) |
+| `loser_entry`       | Entry method                      |
+| `loser_name`        | Full name of the loser            |
+| `loser_hand`        | Playing hand                      |
+| `loser_ht`          | Height in cm                      |
+| `loser_ioc`         | Country code                      |
+| `loser_age`         | Age at the time                   |
+| `loser_rank`        | WTA ranking                       |
+| `loser_rank_points` | WTA ranking points                |
+
+---
+
+### 📊 Match Result（比赛结果）
+
+| Column Name | Meaning                                  |
+| ----------- | ---------------------------------------- |
+| `score`     | Final match score (e.g., 6-3 7-6)        |
+| `best_of`   | Number of sets played (usually 3 in WTA) |
+| `round`     | Match round (e.g., QF = Quarterfinal)    |
+| `minutes`   | Match duration in minutes                |
+
+---
+
+### 🎯 Match Statistics（技术统计）
+
+> `w_` 表示胜者，`l_` 表示败者
+> \| Column Name    | Meaning |
+> \|----------------|---------|
+> \| `*_ace`        | Aces served |
+> \| `*_df`         | Double faults |
+> \| `*_svpt`       | Total serve points played |
+> \| `*_1stIn`      | First serves in |
+> \| `*_1stWon`     | First serve points won |
+> \| `*_2ndWon`     | Second serve points won |
+> \| `*_SvGms`      | Service games played |
+> \| `*_bpSaved`    | Break points saved |
+> \| `*_bpFaced`    | Break points faced |
+
+---
+
+tourney_level（比赛级别）字段通常用单个字母来表示比赛的级别
+
+Code	Level Description	Notes
+G	Grand Slam	四大满贯赛事（如Wimbledon, US Open）
+P	Premier events	原 WTA Premier 系列（现包括 WTA 1000 和部分 500）
+I	International	原 WTA International 赛事（现在多为 WTA 250）
+D	WTA 125 (also called WTA Challenger)	次级巡回赛，排名积分较低
+F	Fed Cup / Billie Jean King Cup	国家队之间的团体赛事
+ 注：WTA 在 2021 年对赛事等级进行了重新命名（如 WTA 1000、WTA 500、WTA 250），
+ Jeff 的数据使用的是旧标签，但结构上可以映射。
