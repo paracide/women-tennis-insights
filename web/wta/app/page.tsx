@@ -7,6 +7,7 @@ import { siteConfig } from "@/config/site";
 import { title, subtitle } from "@/components/primitives";
 import { GithubIcon } from "@/components/icons";
 import MetabaseDashboard from "@/app/dashboard/metabase-dashboard";
+import LookerReport from "@/components/dashboard/looker-studio";
 
 export default function Home() {
   return (
@@ -19,6 +20,9 @@ export default function Home() {
       </div>
        <div className="inline-block text-center justify-center">
         <MetabaseDashboard />
+      </div>
+     <div className="inline-block text-center justify-center">
+        <LookerReport/>
       </div>
     </section>
   );
