@@ -9,4 +9,4 @@ https://github.com/JeffSackmann/tennis_wta
 ### Team Members
 - Yongdong Xiang
 - Yuqi Gu
-- Kan Zhou
+- Kan ZHOU
