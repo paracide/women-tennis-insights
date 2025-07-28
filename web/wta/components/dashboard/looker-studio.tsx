@@ -12,7 +12,6 @@ const LookerReport: React.FC<LookerReportProps> = ({
   return (
     <section>
       <h1 className="text-2xl font-bold mb-4">Looker Studio Dashboard</h1>
-
       <div className="flex justify-center items-center">
         <iframe
           width={width}

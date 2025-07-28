@@ -7,6 +7,10 @@ export const siteConfig = {
     {
       label: "Home",
       href: "/",
+    },
+    {
+      label: "BI",
+      href: "/bi",
     }
   ],
   navMenuItems: [

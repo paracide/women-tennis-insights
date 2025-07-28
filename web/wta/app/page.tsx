@@ -18,12 +18,6 @@ export default function Home() {
         <span className={title({ color: "violet" })}>women's tennis players</span>
         <br />
       </div>
-       <div className="inline-block text-center justify-center">
-        <MetabaseDashboard />
-      </div>
-     <div className="inline-block text-center justify-center">
-        <LookerReport/>
-      </div>
     </section>
   );
 }
