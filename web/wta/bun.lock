@@ -5,6 +5,7 @@
       "name": "next-app-template",
       "dependencies": {
         "@heroui/button": "2.2.23",
+        "@heroui/card": "^2.2.22",
         "@heroui/code": "2.2.17",
         "@heroui/input": "2.4.24",
         "@heroui/kbd": "2.2.18",
@@ -100,6 +101,8 @@
     "@heroui/aria-utils": ["@heroui/aria-utils@2.2.20", "", { "dependencies": { "@heroui/system": "2.4.19", "@react-aria/utils": "3.29.1", "@react-stately/collections": "3.12.5", "@react-types/overlays": "3.8.16", "@react-types/shared": "3.30.0" }, "peerDependencies": { "react": ">=18 || >=19.0.0-rc.0", "react-dom": ">=18 || >=19.0.0-rc.0" } }, "sha512-tq5X29pu5oMLE0bIJbcE43XJwv9UrMusNv5FVOVPWwdyRpo0JfAeCvfqfnvGoT7wHqNNFp9MyOZZyCoZ6DlxIg=="],
 
     "@heroui/button": ["@heroui/button@2.2.23", "", { "dependencies": { "@heroui/react-utils": "2.1.12", "@heroui/ripple": "2.2.18", "@heroui/shared-utils": "2.1.10", "@heroui/spinner": "2.2.20", "@heroui/use-aria-button": "2.2.17", "@react-aria/focus": "3.20.5", "@react-aria/interactions": "3.25.3", "@react-types/shared": "3.30.0" }, "peerDependencies": { "@heroui/system": ">=2.4.18", "@heroui/theme": ">=2.4.17", "framer-motion": ">=11.5.6 || >=12.0.0-alpha.1", "react": ">=18 || >=19.0.0-rc.0", "react-dom": ">=18 || >=19.0.0-rc.0" } }, "sha512-8jvlcVVoJOfjdBm84WHOT2A6bJ8tiT6e0qgzKvSmZrKMgR8T3szkJZR+NkRDOYHuHn3tn6jolfLGpM3ybN5p3g=="],
+
+    "@heroui/card": ["@heroui/card@2.2.22", "", { "dependencies": { "@heroui/react-utils": "2.1.12", "@heroui/ripple": "2.2.18", "@heroui/shared-utils": "2.1.10", "@heroui/use-aria-button": "2.2.17", "@react-aria/focus": "3.20.5", "@react-aria/interactions": "3.25.3", "@react-types/shared": "3.30.0" }, "peerDependencies": { "@heroui/system": ">=2.4.18", "@heroui/theme": ">=2.4.17", "framer-motion": ">=11.5.6 || >=12.0.0-alpha.1", "react": ">=18 || >=19.0.0-rc.0", "react-dom": ">=18 || >=19.0.0-rc.0" } }, "sha512-JJv3snddQJ5y0M4CIC2pu4RDtK2RAXmKx4w22fAfkPEE+lFVZDnyU9fwRhhO8KoIHdv4oYvMJ+McjHIwCQvPrQ=="],
 
     "@heroui/code": ["@heroui/code@2.2.17", "", { "dependencies": { "@heroui/react-utils": "2.1.12", "@heroui/shared-utils": "2.1.10", "@heroui/system-rsc": "2.3.16" }, "peerDependencies": { "@heroui/theme": ">=2.4.17", "react": ">=18 || >=19.0.0-rc.0", "react-dom": ">=18 || >=19.0.0-rc.0" } }, "sha512-Wku5mcfIfvq/x4yXMR+Me35sTG5cLKD+M10amX6AIbIUjqhGJmqlkitpELMWJJjab0UHyn2/AI+VUej4c29W5A=="],
 
