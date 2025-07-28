@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
 // Define the shape of the API response for type safety
 interface MetabaseEmbedResponse {
@@ -9,17 +9,17 @@ interface MetabaseEmbedResponse {
 }
 
 const MetabaseDashboard = () => {
-  const [iframeUrl, setIframeUrl] = useState<string>('');
+  const [iframeUrl, setIframeUrl] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchEmbedUrl = async () => {
       try {
-        const response = await fetch('/api/metabase-embed');
+        const response = await fetch("/api/metabase-embed");
 
         if (!response.ok) {
-          throw new Error('Failed to fetch Metabase embed URL');
+          throw new Error("Failed to fetch Metabase embed URL");
         }
 
         const data: MetabaseEmbedResponse = await response.json();
@@ -33,7 +33,7 @@ const MetabaseDashboard = () => {
         if (err instanceof Error) {
           setError(err.message);
         } else {
-          setError('An unknown error occurred.');
+          setError("An unknown error occurred.");
         }
       } finally {
         setLoading(false);
@@ -59,18 +59,20 @@ const MetabaseDashboard = () => {
     );
   }
 
-  let div = <>
-    <div className="p-4 w-5xl">
-      <h1 className="text-2xl font-bold mb-4">Metabase Dashboard</h1>
-      <iframe
-        src={iframeUrl}
-        frameBorder={0}
-        width="100%"
-        height="500"
-        className="border-none"
-      />
-    </div>
-  </>;
+  let div = (
+    <>
+      <div className="p-4 w-5xl">
+        <h1 className="text-2xl font-bold mb-4">Metabase Dashboard</h1>
+        <iframe
+          src={iframeUrl}
+          frameBorder={0}
+          width="100%"
+          height="500"
+          className="border-none"
+        />
+      </div>
+    </>
+  );
   return div;
 };
 
