@@ -2,7 +2,8 @@ import { title } from "@/components/primitives";
 import { supabase } from "@/lib/supabase";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 
-import type { Database } from "@/types/supabase"; // Your generated types
+import type { Database } from "@/types/supabase";
+import WtaRaceChart from "@/components/dashboard/WtaRaceChart"; // Your generated types
 
 type Player = Database["public"]["Tables"]["player"]["Row"];
 type RankingCurrent = Database["public"]["Tables"]["rankings_current"]["Row"];
@@ -97,6 +98,8 @@ export default async function Home() {
           </CardBody>
         </Card>
       </div>
+
+        <WtaRaceChart></WtaRaceChart>
     </section>
   );
 }
