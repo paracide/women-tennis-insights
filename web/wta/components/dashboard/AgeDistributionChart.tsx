@@ -1,20 +1,20 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import * as echarts from "echarts"
-import { Card, CardBody, CardHeader } from "@heroui/card"
-import { supabase } from "@/lib/supabase"
+import { useEffect, useRef, useState } from "react";
+import * as echarts from "echarts";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { supabase } from "@/lib/supabase";
 
 interface AgeData {
-  ageRange: string
-  winners: number
-  losers: number
+  ageRange: string;
+  winners: number;
+  losers: number;
 }
 
 export default function AgeDistributionChart() {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const [data, setData] = useState<AgeData[]>([])
-  const [loading, setLoading] = useState(true)
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [data, setData] = useState<AgeData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchAgeData() {
@@ -22,12 +22,12 @@ export default function AgeDistributionChart() {
         .from("wta")
         .select("winner_age, loser_age")
         .not("winner_age", "is", null)
-        .not("loser_age", "is", null)
+        .not("loser_age", "is", null);
 
       if (error) {
-        console.error("Error fetching age data:", error)
-        setLoading(false)
-        return
+        console.error("Error fetching age data:", error);
+        setLoading(false);
+        return;
       }
 
       // Create age ranges
@@ -37,35 +37,39 @@ export default function AgeDistributionChart() {
         { range: "26-30", min: 26, max: 30 },
         { range: "31-35", min: 31, max: 35 },
         { range: "36-40", min: 36, max: 40 },
-      ]
+      ];
 
       const ageStats = ageRanges.map(({ range, min, max }) => {
         const winners = matchData.filter(
-          (match) => match.winner_age && match.winner_age >= min && match.winner_age <= max,
-        ).length
+          (match) =>
+            match.winner_age &&
+            match.winner_age >= min &&
+            match.winner_age <= max,
+        ).length;
 
         const losers = matchData.filter(
-          (match) => match.loser_age && match.loser_age >= min && match.loser_age <= max,
-        ).length
+          (match) =>
+            match.loser_age && match.loser_age >= min && match.loser_age <= max,
+        ).length;
 
         return {
           ageRange: range,
           winners,
           losers,
-        }
-      })
+        };
+      });
 
-      setData(ageStats)
-      setLoading(false)
+      setData(ageStats);
+      setLoading(false);
     }
 
-    fetchAgeData()
-  }, [])
+    fetchAgeData();
+  }, []);
 
   useEffect(() => {
-    if (!chartRef.current || loading || data.length === 0) return
+    if (!chartRef.current || loading || data.length === 0) return;
 
-    const chart = echarts.init(chartRef.current)
+    const chart = echarts.init(chartRef.current);
 
     const option = {
       title: {
@@ -148,18 +152,18 @@ export default function AgeDistributionChart() {
           },
         },
       ],
-    }
+    };
 
-    chart.setOption(option)
+    chart.setOption(option);
 
-    const handleResize = () => chart.resize()
-    window.addEventListener("resize", handleResize)
+    const handleResize = () => chart.resize();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-      chart.dispose()
-    }
-  }, [data, loading])
+      window.removeEventListener("resize", handleResize);
+      chart.dispose();
+    };
+  }, [data, loading]);
 
   return (
     <Card className="w-full">
@@ -176,5 +180,5 @@ export default function AgeDistributionChart() {
         )}
       </CardBody>
     </Card>
-  )
+  );
 }

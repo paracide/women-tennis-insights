@@ -1,72 +1,88 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import * as echarts from "echarts"
-import { Card, CardBody, CardHeader } from "@heroui/card"
-import { supabase } from "@/lib/supabase"
+import { useEffect, useRef, useState } from "react";
+import * as echarts from "echarts";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { supabase } from "@/lib/supabase";
 
 interface MonthlyData {
-  month: string
-  matches: number
-  tournaments: number
+  month: string;
+  matches: number;
+  tournaments: number;
 }
 
-const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
+const MONTHS = [
+  "Jan",
+  "Feb",
+  "Mar",
+  "Apr",
+  "May",
+  "Jun",
+  "Jul",
+  "Aug",
+  "Sep",
+  "Oct",
+  "Nov",
+  "Dec",
+];
 
 export default function MonthlyTournamentActivity() {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const [data, setData] = useState<MonthlyData[]>([])
-  const [loading, setLoading] = useState(true)
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [data, setData] = useState<MonthlyData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchMonthlyData() {
       const { data: tournamentData, error } = await supabase
         .from("wta")
         .select("tourney_date, tourney_id")
-        .not("tourney_date", "is", null)
+        .not("tourney_date", "is", null);
 
       if (error) {
-        console.error("Error fetching tournament data:", error)
-        setLoading(false)
-        return
+        console.error("Error fetching tournament data:", error);
+        setLoading(false);
+        return;
       }
 
       // Group by month
-      const monthlyStats: Record<number, { matches: number; tournaments: Set<string> }> = {}
+      const monthlyStats: Record<
+        number,
+        { matches: number; tournaments: Set<string> }
+      > = {};
 
       tournamentData.forEach((match) => {
         if (match.tourney_date) {
-          const date = new Date(match.tourney_date)
-          const month = date.getMonth()
+          const date = new Date(match.tourney_date);
+          const month = date.getMonth();
 
           if (!monthlyStats[month]) {
-            monthlyStats[month] = { matches: 0, tournaments: new Set() }
+            monthlyStats[month] = { matches: 0, tournaments: new Set() };
           }
 
-          monthlyStats[month].matches++
+          monthlyStats[month].matches++;
           if (match.tourney_id) {
-            monthlyStats[month].tournaments.add(match.tourney_id)
+            monthlyStats[month].tournaments.add(match.tourney_id);
           }
         }
-      })
+      });
 
       const chartData = MONTHS.map((monthName, index) => ({
         month: monthName,
         matches: monthlyStats[index]?.matches || 0,
         tournaments: monthlyStats[index]?.tournaments.size || 0,
-      }))
+      }));
 
-      setData(chartData)
-      setLoading(false)
+      setData(chartData);
+      setLoading(false);
     }
 
-    fetchMonthlyData()
-  }, [])
+    fetchMonthlyData();
+  }, []);
 
   useEffect(() => {
-    if (!chartRef.current || loading || data.length === 0) return
+    if (!chartRef.current || loading || data.length === 0) return;
 
-    const chart = echarts.init(chartRef.current)
+    const chart = echarts.init(chartRef.current);
 
     const option = {
       title: {
@@ -147,18 +163,18 @@ export default function MonthlyTournamentActivity() {
           },
         },
       ],
-    }
+    };
 
-    chart.setOption(option)
+    chart.setOption(option);
 
-    const handleResize = () => chart.resize()
-    window.addEventListener("resize", handleResize)
+    const handleResize = () => chart.resize();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-      chart.dispose()
-    }
-  }, [data, loading])
+      window.removeEventListener("resize", handleResize);
+      chart.dispose();
+    };
+  }, [data, loading]);
 
   return (
     <Card className="w-full">
@@ -175,5 +191,5 @@ export default function MonthlyTournamentActivity() {
         )}
       </CardBody>
     </Card>
-  )
+  );
 }

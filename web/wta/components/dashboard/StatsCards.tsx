@@ -1,7 +1,7 @@
-import React from 'react';
-import {supabase} from "@/lib/supabase";
-import type {Database} from "@/types/supabase";
-import {Card, CardBody, CardHeader} from "@heroui/card";
+import React from "react";
+import { supabase } from "@/lib/supabase";
+import type { Database } from "@/types/supabase";
+import { Card, CardBody, CardHeader } from "@heroui/card";
 
 type Player = Database["public"]["Tables"]["player"]["Row"];
 type RankingCurrent = Database["public"]["Tables"]["rankings_current"]["Row"];

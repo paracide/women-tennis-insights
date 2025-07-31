@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import * as echarts from "echarts"
-import { Card, CardBody, CardHeader } from "@heroui/card"
-import { supabase } from "@/lib/supabase"
+import { useEffect, useRef, useState } from "react";
+import * as echarts from "echarts";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { supabase } from "@/lib/supabase";
 
 interface TournamentLevelData {
-  name: string
-  value: number
+  name: string;
+  value: number;
 }
 
 const LEVEL_LABELS = {
@@ -16,49 +16,52 @@ const LEVEL_LABELS = {
   WTA500: "WTA 500",
   WTA250: "WTA 250",
   Other: "Other",
-}
+};
 
 export default function TournamentLevelChart() {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const [data, setData] = useState<TournamentLevelData[]>([])
-  const [loading, setLoading] = useState(true)
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [data, setData] = useState<TournamentLevelData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchTournamentLevels() {
       const { data: tournamentData, error } = await supabase
         .from("wta")
         .select("tourney_level")
-        .not("tourney_level", "is", null)
+        .not("tourney_level", "is", null);
 
       if (error) {
-        console.error("Error fetching tournament level data:", error)
-        setLoading(false)
-        return
+        console.error("Error fetching tournament level data:", error);
+        setLoading(false);
+        return;
       }
 
       // Count tournament levels
-      const levelCounts = tournamentData.reduce((acc: Record<string, number>, tournament) => {
-        const level = tournament.tourney_level || "Other"
-        acc[level] = (acc[level] || 0) + 1
-        return acc
-      }, {})
+      const levelCounts = tournamentData.reduce(
+        (acc: Record<string, number>, tournament) => {
+          const level = tournament.tourney_level || "Other";
+          acc[level] = (acc[level] || 0) + 1;
+          return acc;
+        },
+        {},
+      );
 
       const chartData = Object.entries(levelCounts).map(([level, value]) => ({
         name: LEVEL_LABELS[level as keyof typeof LEVEL_LABELS] || level,
         value,
-      }))
+      }));
 
-      setData(chartData)
-      setLoading(false)
+      setData(chartData);
+      setLoading(false);
     }
 
-    fetchTournamentLevels()
-  }, [])
+    fetchTournamentLevels();
+  }, []);
 
   useEffect(() => {
-    if (!chartRef.current || loading || data.length === 0) return
+    if (!chartRef.current || loading || data.length === 0) return;
 
-    const chart = echarts.init(chartRef.current)
+    const chart = echarts.init(chartRef.current);
 
     const option = {
       title: {
@@ -108,18 +111,18 @@ export default function TournamentLevelChart() {
         },
       ],
       color: ["#ef4444", "#3b82f6", "#10b981", "#f59e0b", "#8b5cf6"],
-    }
+    };
 
-    chart.setOption(option)
+    chart.setOption(option);
 
-    const handleResize = () => chart.resize()
-    window.addEventListener("resize", handleResize)
+    const handleResize = () => chart.resize();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-      chart.dispose()
-    }
-  }, [data, loading])
+      window.removeEventListener("resize", handleResize);
+      chart.dispose();
+    };
+  }, [data, loading]);
 
   return (
     <Card className="w-full">
@@ -136,5 +139,5 @@ export default function TournamentLevelChart() {
         )}
       </CardBody>
     </Card>
-  )
+  );
 }

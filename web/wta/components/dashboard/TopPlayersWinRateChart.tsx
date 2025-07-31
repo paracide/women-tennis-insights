@@ -1,22 +1,22 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import * as echarts from "echarts"
-import { Card, CardBody, CardHeader } from "@heroui/card"
-import { supabase } from "@/lib/supabase"
+import { useEffect, useRef, useState } from "react";
+import * as echarts from "echarts";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { supabase } from "@/lib/supabase";
 
 interface PlayerWinRate {
-  name: string
-  winRate: number
-  wins: number
-  losses: number
-  totalMatches: number
+  name: string;
+  winRate: number;
+  wins: number;
+  losses: number;
+  totalMatches: number;
 }
 
 export default function TopPlayersWinRateChart() {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const [data, setData] = useState<PlayerWinRate[]>([])
-  const [loading, setLoading] = useState(true)
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [data, setData] = useState<PlayerWinRate[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchPlayerWinRates() {
@@ -24,60 +24,61 @@ export default function TopPlayersWinRateChart() {
         .from("wta")
         .select("winner_name, loser_name")
         .not("winner_name", "is", null)
-        .not("loser_name", "is", null)
+        .not("loser_name", "is", null);
 
       if (error) {
-        console.error("Error fetching match data:", error)
-        setLoading(false)
-        return
+        console.error("Error fetching match data:", error);
+        setLoading(false);
+        return;
       }
 
       // Calculate win/loss records
-      const playerStats: Record<string, { wins: number; losses: number }> = {}
+      const playerStats: Record<string, { wins: number; losses: number }> = {};
 
       matches.forEach((match) => {
-        const winner = match.winner_name!
-        const loser = match.loser_name!
+        const winner = match.winner_name!;
+        const loser = match.loser_name!;
 
         if (!playerStats[winner]) {
-          playerStats[winner] = { wins: 0, losses: 0 }
+          playerStats[winner] = { wins: 0, losses: 0 };
         }
         if (!playerStats[loser]) {
-          playerStats[loser] = { wins: 0, losses: 0 }
+          playerStats[loser] = { wins: 0, losses: 0 };
         }
 
-        playerStats[winner].wins++
-        playerStats[loser].losses++
-      })
+        playerStats[winner].wins++;
+        playerStats[loser].losses++;
+      });
 
       // Calculate win rates and filter for players with at least 20 matches
       const playerWinRates = Object.entries(playerStats)
         .map(([name, stats]) => {
-          const totalMatches = stats.wins + stats.losses
-          const winRate = totalMatches > 0 ? (stats.wins / totalMatches) * 100 : 0
+          const totalMatches = stats.wins + stats.losses;
+          const winRate =
+            totalMatches > 0 ? (stats.wins / totalMatches) * 100 : 0;
           return {
             name,
             winRate: Math.round(winRate * 100) / 100,
             wins: stats.wins,
             losses: stats.losses,
             totalMatches,
-          }
+          };
         })
         .filter((player) => player.totalMatches >= 20)
-        .sort((a, b) => b.winRate - a.winRate)
-        .slice(0, 15)
+        .sort((a, b) => a.winRate - b.winRate)
+        .slice(0, 15);
 
-      setData(playerWinRates)
-      setLoading(false)
+      setData(playerWinRates);
+      setLoading(false);
     }
 
-    fetchPlayerWinRates()
-  }, [])
+    fetchPlayerWinRates();
+  }, []);
 
   useEffect(() => {
-    if (!chartRef.current || loading || data.length === 0) return
+    if (!chartRef.current || loading || data.length === 0) return;
 
-    const chart = echarts.init(chartRef.current)
+    const chart = echarts.init(chartRef.current);
 
     const option = {
       title: {
@@ -94,11 +95,11 @@ export default function TopPlayersWinRateChart() {
           type: "shadow",
         },
         formatter: (params: any) => {
-          const data = params[0]
-          const player = data.name
-          const winRate = data.value
-          const playerData = data.data
-          return `${player}<br/>Win Rate: ${winRate}%<br/>Wins: ${playerData.wins}<br/>Losses: ${playerData.losses}<br/>Total: ${playerData.totalMatches}`
+          const data = params[0];
+          const player = data.name;
+          const winRate = data.value;
+          const playerData = data.data;
+          return `${player}<br/>Win Rate: ${winRate}%<br/>Wins: ${playerData.wins}<br/>Losses: ${playerData.losses}<br/>Total: ${playerData.totalMatches}`;
         },
       },
       grid: {
@@ -141,18 +142,18 @@ export default function TopPlayersWinRateChart() {
           },
         },
       ],
-    }
+    };
 
-    chart.setOption(option)
+    chart.setOption(option);
 
-    const handleResize = () => chart.resize()
-    window.addEventListener("resize", handleResize)
+    const handleResize = () => chart.resize();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-      chart.dispose()
-    }
-  }, [data, loading])
+      window.removeEventListener("resize", handleResize);
+      chart.dispose();
+    };
+  }, [data, loading]);
 
   return (
     <Card className="w-full">
@@ -169,5 +170,5 @@ export default function TopPlayersWinRateChart() {
         )}
       </CardBody>
     </Card>
-  )
+  );
 }

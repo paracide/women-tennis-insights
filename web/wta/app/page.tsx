@@ -32,7 +32,7 @@ export default async function Home() {
         <TopPlayersWinRateChart/>
         <TournamentLevelChart/>
       </div>
-      <WtaRaceChart></WtaRaceChart>
+
     </section>
   );
 }

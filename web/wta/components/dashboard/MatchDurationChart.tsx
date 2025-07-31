@@ -1,19 +1,19 @@
-"use client"
+"use client";
 
-import { useEffect, useState, useRef } from "react"
-import * as echarts from "echarts"
-import { Card, CardBody, CardHeader } from "@heroui/card"
-import { supabase } from "@/lib/supabase"
+import { useEffect, useRef, useState } from "react";
+import * as echarts from "echarts";
+import { Card, CardBody, CardHeader } from "@heroui/card";
+import { supabase } from "@/lib/supabase";
 
 interface DurationData {
-  range: string
-  count: number
+  range: string;
+  count: number;
 }
 
 export default function MatchDurationChart() {
-  const chartRef = useRef<HTMLDivElement>(null)
-  const [data, setData] = useState<DurationData[]>([])
-  const [loading, setLoading] = useState(true)
+  const chartRef = useRef<HTMLDivElement>(null);
+  const [data, setData] = useState<DurationData[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     async function fetchDurationData() {
@@ -21,12 +21,12 @@ export default function MatchDurationChart() {
         .from("wta")
         .select("minutes")
         .not("minutes", "is", null)
-        .gt("minutes", 0)
+        .gt("minutes", 0);
 
       if (error) {
-        console.error("Error fetching duration data:", error)
-        setLoading(false)
-        return
+        console.error("Error fetching duration data:", error);
+        setLoading(false);
+        return;
       }
 
       // Create duration ranges (in minutes)
@@ -37,28 +37,31 @@ export default function MatchDurationChart() {
         { range: "121-150", min: 121, max: 150 },
         { range: "151-180", min: 151, max: 180 },
         { range: "181+", min: 181, max: Number.POSITIVE_INFINITY },
-      ]
+      ];
 
       const durationStats = durationRanges.map(({ range, min, max }) => {
-        const count = matchData.filter((match) => match.minutes && match.minutes >= min && match.minutes <= max).length
+        const count = matchData.filter(
+          (match) =>
+            match.minutes && match.minutes >= min && match.minutes <= max,
+        ).length;
 
         return {
           range,
           count,
-        }
-      })
+        };
+      });
 
-      setData(durationStats)
-      setLoading(false)
+      setData(durationStats);
+      setLoading(false);
     }
 
-    fetchDurationData()
-  }, [])
+    fetchDurationData();
+  }, []);
 
   useEffect(() => {
-    if (!chartRef.current || loading || data.length === 0) return
+    if (!chartRef.current || loading || data.length === 0) return;
 
-    const chart = echarts.init(chartRef.current)
+    const chart = echarts.init(chartRef.current);
 
     const option = {
       title: {
@@ -75,8 +78,8 @@ export default function MatchDurationChart() {
           type: "shadow",
         },
         formatter: (params: any) => {
-          const data = params[0]
-          return `${data.name} minutes<br/>Matches: ${data.value}`
+          const data = params[0];
+          return `${data.name} minutes<br/>Matches: ${data.value}`;
         },
       },
       grid: {
@@ -117,18 +120,18 @@ export default function MatchDurationChart() {
           },
         },
       ],
-    }
+    };
 
-    chart.setOption(option)
+    chart.setOption(option);
 
-    const handleResize = () => chart.resize()
-    window.addEventListener("resize", handleResize)
+    const handleResize = () => chart.resize();
+    window.addEventListener("resize", handleResize);
 
     return () => {
-      window.removeEventListener("resize", handleResize)
-      chart.dispose()
-    }
-  }, [data, loading])
+      window.removeEventListener("resize", handleResize);
+      chart.dispose();
+    };
+  }, [data, loading]);
 
   return (
     <Card className="w-full">
@@ -145,5 +148,5 @@ export default function MatchDurationChart() {
         )}
       </CardBody>
     </Card>
-  )
+  );
 }
