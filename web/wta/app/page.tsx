@@ -3,7 +3,8 @@ import { supabase } from "@/lib/supabase";
 import { Card, CardBody, CardHeader } from "@heroui/card";
 
 import type { Database } from "@/types/supabase";
-import WtaRaceChart from "@/components/dashboard/WtaRaceChart"; // Your generated types
+import WtaRaceChart from "@/components/dashboard/WtaRaceChart";
+import AgeDistributionChart from "@/components/dashboard/AgeDistributionChart"; // Your generated types
 
 type Player = Database["public"]["Tables"]["player"]["Row"];
 type RankingCurrent = Database["public"]["Tables"]["rankings_current"]["Row"];
@@ -60,6 +61,7 @@ export default async function Home() {
         <br />
       </div>
 
+
       {/* Stats Cards */}
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
         <Card>
@@ -99,7 +101,9 @@ export default async function Home() {
         </Card>
       </div>
 
-        <WtaRaceChart></WtaRaceChart>
+      <AgeDistributionChart></AgeDistributionChart>
+
+      <WtaRaceChart></WtaRaceChart>
     </section>
   );
 }
