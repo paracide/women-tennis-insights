@@ -4,10 +4,29 @@ import { useEffect, useRef, useState } from "react"
 import * as echarts from "echarts"
 import type { EChartsOption } from "echarts"
 
+type PlayerData = {
+  name: string
+  value: number
+}
+
+type RaceFrame = {
+  date: string
+  players: PlayerData[]
+}
+
+type Metadata = {
+  [name: string]: {
+    ioc: string
+    emoji: string
+    color: string
+  }
+}
+
 export default function WtaRaceChart() {
   const chartRef = useRef<HTMLDivElement>(null)
   const chartInstance = useRef<echarts.ECharts | null>(null)
-  const [data, setData] = useState<Array<{ date: string; data: { [key: string]: number } }>>([])
+  const [data, setData] = useState<RaceFrame[]>([])
+  const [meta, setMeta] = useState<Metadata>({})
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -15,31 +34,14 @@ export default function WtaRaceChart() {
     try {
       setLoading(true)
       const response = await fetch("/data/top10.json")
-      if (!response.ok) {
-        throw new Error("Failed to load data")
-      }
-      const jsonData = await response.json()
+      if (!response.ok) throw new Error("加载失败")
+      const json = await response.json()
 
-      // 转换数据格式
-      const formattedData = Object.entries(jsonData).map(([date, players]) => {
-        const playerData: { [key: string]: number } = {}
-        Object.entries(players as { [key: string]: number | null }).forEach(([name, value]) => {
-          // 如果值为null，给一个默认值，或者根据某种逻辑计算
-          playerData[name] = value || Math.floor(Math.random() * 1000) + 500
-        })
-        return {
-          date,
-          data: playerData,
-        }
-      })
-
-      // 按日期排序
-      formattedData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-
-      setData(formattedData)
+      setMeta(json.metadata || {})
+      setData(json.data || [])
       setError(null)
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred")
+      setError(err instanceof Error ? err.message : "未知错误")
     } finally {
       setLoading(false)
     }
@@ -52,31 +54,33 @@ export default function WtaRaceChart() {
   useEffect(() => {
     if (!chartRef.current || data.length === 0) return
 
-    // 初始化图表
     chartInstance.current = echarts.init(chartRef.current)
-
     let currentIndex = 0
 
     const updateChart = () => {
-      const currentData = data[currentIndex]
+      const current = data[currentIndex]
+      const sorted = [...current.players]
+        .sort((a, b) => b.value - a.value)
+        .slice(0, 10)
 
-      // 按分数排序
-      const sortedData = Object.entries(currentData.data)
-        .sort(([, a], [, b]) => b - a)
-        .slice(0, 10) // 只显示前10名
+      const yLabels = sorted.map((p) => {
+        const m = meta[p.name]
+        const flag = m?.emoji ?? ""
+        return `${flag} ${p.name}`
+      })
 
       const option: EChartsOption = {
         title: {
-          text: "WTA网球选手排名变化",
-          subtext: currentData.date,
+          text: "WTA 女子网球选手排名 Bar Race",
+          subtext: current.date,
           left: "center",
           textStyle: {
-            fontSize: 24,
+            fontSize: 22,
             fontWeight: "bold",
           },
           subtextStyle: {
-            fontSize: 16,
-            color: "#666",
+            fontSize: 14,
+            color: "#888",
           },
         },
         grid: {
@@ -93,96 +97,79 @@ export default function WtaRaceChart() {
           },
           splitLine: {
             show: true,
-            lineStyle: {
-              color: "#f0f0f0",
-            },
+            lineStyle: { color: "#eee" },
           },
         },
         yAxis: {
           type: "category",
-          data: sortedData.map(([name]: [string, number]) => name),
+          data: yLabels,
           inverse: true,
           axisLabel: {
             fontSize: 12,
-            formatter: (value: string) => {
-              // 截断过长的名字
-              return value.length > 15 ? value.substring(0, 15) + "..." : value
-            },
+            formatter: (val: string) => val.length > 18 ? val.slice(0, 18) + "..." : val,
           },
-          axisLine: {
-            show: false,
-          },
-          axisTick: {
-            show: false,
-          },
+          axisLine: { show: false },
+          axisTick: { show: false },
         },
         series: [
           {
             type: "bar",
-            data: sortedData.map(([name, value]: [string, number], index: number) => ({
-              value: value,
+            data: sorted.map((p) => ({
+              value: p.value,
               itemStyle: {
-                color: `#${Math.floor(Math.random() * 16777215).toString(16)}`,
+                color: meta[p.name]?.color ?? "#999",
               },
             })),
-            barWidth: "60%",
             label: {
               show: true,
               position: "right",
               formatter: "{c}",
-              fontSize: 12,
               fontWeight: "bold",
             },
-            animationDuration: 1000,
-            animationEasing: "cubicOut" as const,
+            barWidth: "60%",
+            animationDuration: 500,
+            animationEasing: "cubicOut",
           },
         ],
-        animationDuration: 1000,
-        animationEasing: "cubicOut" as const,
+        animationDuration: 500,
+        animationEasing: "cubicOut",
       }
 
       chartInstance.current?.setOption(option)
     }
 
-    // 初始渲染
     updateChart()
 
-    // 自动播放动画
     const interval = setInterval(() => {
       currentIndex = (currentIndex + 1) % data.length
       updateChart()
-    }, 500)
+    }, 800)
 
-    // 响应式处理
-    const handleResize = () => {
-      chartInstance.current?.resize()
-    }
-    window.addEventListener("resize", handleResize)
+    const resize = () => chartInstance.current?.resize()
+    window.addEventListener("resize", resize)
 
     return () => {
       clearInterval(interval)
-      window.removeEventListener("resize", handleResize)
+      window.removeEventListener("resize", resize)
       chartInstance.current?.dispose()
     }
-  }, [data])
+  }, [data, meta])
 
   if (loading) {
     return (
-      <div className="w-full h-full min-h-[600px] p-4 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-gray-600">加载数据中...</p>
-        </div>
+      <div className="w-full h-full min-h-[600px] flex items-center justify-center">
+        <div className="text-center text-gray-600">加载数据中...</div>
       </div>
     )
   }
 
   if (error) {
     return (
-      <div className="w-full h-full min-h-[600px] p-4 flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-red-600 mb-4">加载数据失败: {error}</p>
-          <button onClick={loadData} className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
+      <div className="w-full h-full min-h-[600px] flex items-center justify-center">
+        <div className="text-center text-red-600">
+          加载失败: {error}
+          <br />
+          <button onClick={loadData} className="mt-4 px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700">
             重试
           </button>
         </div>
@@ -192,7 +179,7 @@ export default function WtaRaceChart() {
 
   return (
     <div className="w-full h-full min-h-[600px] p-4">
-      <div ref={chartRef} className="w-full h-[600px] border border-gray-200 rounded-lg shadow-sm" />
+      <div ref={chartRef} className="w-full h-[600px] border rounded shadow" />
     </div>
   )
 }
