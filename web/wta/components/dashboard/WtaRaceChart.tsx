@@ -54,7 +54,9 @@ export default function WtaRaceChart() {
   useEffect(() => {
     if (!chartRef.current || data.length === 0) return
 
-    chartInstance.current = echarts.init(chartRef.current)
+    chartInstance.current = echarts.init(chartRef.current, undefined, {
+      renderer: "svg"
+    })
     let currentIndex = 0
 
     const updateChart = () => {
@@ -65,13 +67,13 @@ export default function WtaRaceChart() {
 
       const yLabels = sorted.map((p) => {
         const m = meta[p.name]
-        const flag = m?.emoji ?? ""
-        return `${flag} ${p.name}`
+        return `${m.emoji} ${p.name}`
       })
+
 
       const option: EChartsOption = {
         title: {
-          text: "WTA 女子网球选手排名 Bar Race",
+          text: "WTA Top Players Ranking Race",
           subtext: current.date,
           left: "center",
           textStyle: {
@@ -143,7 +145,7 @@ export default function WtaRaceChart() {
     const interval = setInterval(() => {
       currentIndex = (currentIndex + 1) % data.length
       updateChart()
-    }, 800)
+    }, 500)
 
     const resize = () => chartInstance.current?.resize()
     window.addEventListener("resize", resize)
@@ -154,6 +156,14 @@ export default function WtaRaceChart() {
       chartInstance.current?.dispose()
     }
   }, [data, meta])
+
+  function countryCodeToEmoji(code: string): string {
+    return code
+      .toUpperCase()
+      .replace(/./g, char =>
+        String.fromCodePoint(127397 + char.charCodeAt(0))
+      )
+  }
 
   if (loading) {
     return (
