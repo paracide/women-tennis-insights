@@ -164,7 +164,6 @@ export default function MonthlyTournamentActivity() {
     <Card className="w-full">
       <CardHeader>
         <h3 className="text-lg font-semibold">Monthly Tournament Activity</h3>
-        <p className="text-sm text-default-500">Number of matches and tournaments by month</p>
       </CardHeader>
       <CardBody>
         {loading ? (

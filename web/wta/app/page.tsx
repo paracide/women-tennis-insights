@@ -3,7 +3,10 @@ import WtaRaceChart from "@/components/dashboard/WtaRaceChart";
 import AgeDistributionChart from "@/components/dashboard/AgeDistributionChart";
 import StatsCards from "@/components/dashboard/StatsCards";
 import MatchDurationChart from "@/components/dashboard/MatchDurationChart";
-import MonthlyTournamentActivity from "@/components/dashboard/MonthlyTournamentActivity"; // Your generated types
+import MonthlyTournamentActivity from "@/components/dashboard/MonthlyTournamentActivity";
+import SurfaceDistributionChart from "@/components/dashboard/SurfaceDistributionChart";
+import TopPlayersWinRateChart from "@/components/dashboard/TopPlayersWinRateChart";
+import TournamentLevelChart from "@/components/dashboard/TournamentLevelChart"; // Your generated types
 
 
 export default async function Home() {
@@ -25,10 +28,10 @@ export default async function Home() {
         <AgeDistributionChart/>
         <MatchDurationChart/>
         <MonthlyTournamentActivity/>
+        <SurfaceDistributionChart/>
+        <TopPlayersWinRateChart/>
+        <TournamentLevelChart/>
       </div>
-
-      
-
       <WtaRaceChart></WtaRaceChart>
     </section>
   );
