@@ -163,9 +163,8 @@ export default function AgeDistributionChart() {
 
   return (
     <Card className="w-full">
-      <CardHeader>
+      <CardHeader className="w-full">
         <h3 className="text-lg font-semibold">Age Distribution</h3>
-        <p className="text-sm text-default-500">Distribution of winners and losers by age range</p>
       </CardHeader>
       <CardBody>
         {loading ? (

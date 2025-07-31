@@ -1,7 +1,9 @@
 import {title} from "@/components/primitives";
 import WtaRaceChart from "@/components/dashboard/WtaRaceChart";
 import AgeDistributionChart from "@/components/dashboard/AgeDistributionChart";
-import StatsCards from "@/components/dashboard/StatsCards"; // Your generated types
+import StatsCards from "@/components/dashboard/StatsCards";
+import MatchDurationChart from "@/components/dashboard/MatchDurationChart";
+import MonthlyTournamentActivity from "@/components/dashboard/MonthlyTournamentActivity"; // Your generated types
 
 
 export default async function Home() {
@@ -19,7 +21,13 @@ export default async function Home() {
       </div>
       <StatsCards/>
 
-      <AgeDistributionChart></AgeDistributionChart>
+      <div className="w-full grid grid-cols-1 md:grid-cols-2 gap-8">
+        <AgeDistributionChart/>
+        <MatchDurationChart/>
+        <MonthlyTournamentActivity/>
+      </div>
+
+      
 
       <WtaRaceChart></WtaRaceChart>
     </section>
