@@ -120,6 +120,7 @@ export default function WtaRaceChart() {
           inverse: true,
           axisLabel: {
             fontSize: 18,
+            color: "#fff",
             formatter: (val: string) =>
               val.length > 18 ? val.slice(0, 18) + "..." : val,
           },
@@ -142,13 +143,13 @@ export default function WtaRaceChart() {
               fontWeight: "bold",
             },
             barWidth: "60%",
-            animationDuration: 500,
+            animationDuration: 400,
             animationEasing: "linear",
-            animationDurationUpdate: 500,
+            animationDurationUpdate: 400,
             animationEasingUpdate: "linear",
           },
         ],
-        animationDuration: 500,
+        animationDuration: 400,
         animationEasing: "cubicOut",
       };
 
@@ -160,7 +161,7 @@ export default function WtaRaceChart() {
     const interval = setInterval(() => {
       currentIndex = (currentIndex + 1) % data.length;
       updateChart();
-    }, 500);
+    }, 400);
 
     const resize = () => chartInstance.current?.resize();
     window.addEventListener("resize", resize);

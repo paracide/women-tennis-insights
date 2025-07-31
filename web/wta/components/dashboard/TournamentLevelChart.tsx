@@ -64,14 +64,6 @@ export default function TournamentLevelChart() {
     const chart = echarts.init(chartRef.current);
 
     const option = {
-      title: {
-        text: "Tournament Level Distribution",
-        left: "center",
-        textStyle: {
-          fontSize: 16,
-          fontWeight: "bold",
-        },
-      },
       tooltip: {
         trigger: "item",
         formatter: "{a} <br/>{b}: {c} ({d}%)",

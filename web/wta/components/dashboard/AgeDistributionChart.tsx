@@ -72,14 +72,6 @@ export default function AgeDistributionChart() {
     const chart = echarts.init(chartRef.current);
 
     const option = {
-      title: {
-        text: "Age Distribution",
-        left: "center",
-        textStyle: {
-          fontSize: 16,
-          fontWeight: "bold",
-        },
-      },
       tooltip: {
         trigger: "axis",
         axisPointer: {

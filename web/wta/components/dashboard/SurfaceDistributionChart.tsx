@@ -56,14 +56,6 @@ export default function SurfaceDistributionChart() {
     const chart = echarts.init(chartRef.current);
 
     const option = {
-      title: {
-        text: "Court Surface Distribution",
-        left: "center",
-        textStyle: {
-          fontSize: 16,
-          fontWeight: "bold",
-        },
-      },
       tooltip: {
         trigger: "item",
         formatter: "{a} <br/>{b}: {c} ({d}%)",

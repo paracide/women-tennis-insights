@@ -64,14 +64,6 @@ export default function MatchDurationChart() {
     const chart = echarts.init(chartRef.current);
 
     const option = {
-      title: {
-        text: "Match Duration Distribution",
-        left: "center",
-        textStyle: {
-          fontSize: 16,
-          fontWeight: "bold",
-        },
-      },
       tooltip: {
         trigger: "axis",
         axisPointer: {

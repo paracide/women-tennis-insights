@@ -85,14 +85,6 @@ export default function MonthlyTournamentActivity() {
     const chart = echarts.init(chartRef.current);
 
     const option = {
-      title: {
-        text: "Monthly Tournament Activity",
-        left: "center",
-        textStyle: {
-          fontSize: 16,
-          fontWeight: "bold",
-        },
-      },
       tooltip: {
         trigger: "axis",
         axisPointer: {

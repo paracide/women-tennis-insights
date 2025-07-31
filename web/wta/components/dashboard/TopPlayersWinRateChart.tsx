@@ -81,14 +81,6 @@ export default function TopPlayersWinRateChart() {
     const chart = echarts.init(chartRef.current);
 
     const option = {
-      title: {
-        text: "Top Players by Win Rate",
-        left: "center",
-        textStyle: {
-          fontSize: 16,
-          fontWeight: "bold",
-        },
-      },
       tooltip: {
         trigger: "axis",
         axisPointer: {
