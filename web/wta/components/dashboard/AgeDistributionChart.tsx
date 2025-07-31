@@ -4,9 +4,6 @@ import { useEffect, useState, useRef } from "react"
 import * as echarts from "echarts"
 import { Card, CardBody, CardHeader } from "@heroui/card"
 import { supabase } from "@/lib/supabase"
-import { Colors } from 'chart.js';
-
-Chart.register(Colors);
 
 interface AgeData {
   ageRange: string
