@@ -1,34 +1,26 @@
 import pandas as pd
 import json
 
-# 读取数据
 ranking_all = pd.read_csv('../data/proceed/ranking_all.csv')
 players = pd.read_csv('../data/raw/wta_players.csv')
 
-# 筛选时间
 ranking_all = ranking_all[ranking_all['ranking_date'] > '1990-01-01']
 
-# 合并姓名和ioc
 players['name'] = players['name_first'] + ' ' + players['name_last']
 df = ranking_all.merge(players[['player_id', 'name', 'ioc']], left_on='player', right_on='player_id', how='left')
 
-# 日期处理
 df['ranking_date'] = pd.to_datetime(df['ranking_date'])
 df['year'] = df['ranking_date'].dt.year
 df['month'] = df['ranking_date'].dt.month
 
-# 选每月第一天的记录
 df = df.sort_values('ranking_date')
 first_dates = df.groupby(['year', 'month'])['ranking_date'].first().reset_index()
 df = df.merge(first_dates, on=['year', 'month', 'ranking_date'])
 
-# 只要前10名
 df = df[df['rank'] <= 10].copy()
 
-# 日期转字符串
 df['date_str'] = df['ranking_date'].dt.strftime('%Y-%m-%d')
 
-# IOC -> Emoji 映射
 ioc_to_emoji = {
     "ARG": "🇦🇷",
     "AUS": "🇦🇺",
@@ -65,7 +57,6 @@ ioc_to_emoji = {
     "USA": "🇺🇸",
 }
 
-# IOC -> 颜色映射
 ioc_to_color = {
     "ARG": "#75AADB",
     "AUS": "#00843D",
@@ -102,7 +93,6 @@ ioc_to_color = {
     "USA": "#3C3B6E",
 }
 
-# 准备metadata：name -> {ioc, emoji, color}
 metadata_raw = df[['name', 'ioc']].drop_duplicates().set_index('name')['ioc'].to_dict()
 metadata = {}
 for name, ioc in metadata_raw.items():
@@ -114,7 +104,6 @@ for name, ioc in metadata_raw.items():
         "color": color,
     }
 
-# 构造data数组
 data = []
 for date_str, group in df.groupby('date_str'):
     group = group.sort_values('rank')
@@ -134,13 +123,11 @@ for date_str, group in df.groupby('date_str'):
         "players": players_list
     })
 
-# 最终结果
 result = {
     "metadata": metadata,
     "data": data,
 }
 
-# 写入JSON文件
 with open('../web/wta/public/data/top10.json', 'w', encoding='utf-8') as f:
     json.dump(result, f, ensure_ascii=False, indent=2)
 
