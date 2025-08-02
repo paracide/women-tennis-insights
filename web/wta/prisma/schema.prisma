@@ -1,0 +1,102 @@
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model ranking_100 {
+  ranking_date String?
+  rank         Int?
+  player       Int?
+  points       Int?
+  tours        Int?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model rankings_current {
+  ranking_date BigInt?
+  rank         BigInt?
+  player       BigInt?
+  points       BigInt?
+  tours        String?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model wta {
+  tourney_id         String?   @db.VarChar(20)
+  tourney_name       String?
+  surface            String?   @db.VarChar(10)
+  draw_size          Int?
+  tourney_level      String?   @db.VarChar(5)
+  tourney_date       DateTime? @db.Date
+  match_num          Int?
+  winner_id          Int?
+  winner_seed        Int?
+  winner_entry       String?   @db.VarChar(5)
+  winner_name        String?   @db.VarChar(100)
+  winner_hand        String?   @db.Char(1)
+  winner_ht          Int?
+  winner_ioc         String?   @db.Char(3)
+  winner_age         Decimal?  @db.Decimal(4, 1)
+  loser_id           Int?
+  loser_seed         Int?
+  loser_entry        String?   @db.VarChar(5)
+  loser_name         String?   @db.VarChar(100)
+  loser_hand         String?   @db.Char(1)
+  loser_ht           Int?
+  loser_ioc          String?   @db.Char(3)
+  loser_age          Decimal?  @db.Decimal(4, 1)
+  score              String?   @db.VarChar(50)
+  best_of            Int?
+  round              String?   @db.VarChar(10)
+  minutes            Int?
+  w_ace              Int?
+  w_df               Int?
+  w_svpt             Int?
+  w_1stin            Int?
+  w_1stwon           Int?
+  w_2ndwon           Int?
+  w_svgms            Int?
+  w_bpsaved          Int?
+  w_bpfaced          Int?
+  l_ace              Int?
+  l_df               Int?
+  l_svpt             Int?
+  l_1stin            Int?
+  l_1stwon           Int?
+  l_2ndwon           Int?
+  l_svgms            Int?
+  l_bpsaved          Int?
+  l_bpfaced          Int?
+  winner_rank        Int?
+  winner_rank_points Int?
+  loser_rank         Int?
+  loser_rank_points  Int?
+  data_from          String?   @db.VarChar(20)
+  year               Int?
+
+  @@ignore
+}
+
+/// The underlying table does not contain a valid unique identifier and can therefore currently not be handled by Prisma Client.
+model players {
+  player_id   Int?
+  name_first  String?
+  name_last   String?
+  hand        String?
+  dob         DateTime? @db.Date
+  ioc         String?
+  height      Int?
+  wikidata_id String?
+
+  @@ignore
+}
