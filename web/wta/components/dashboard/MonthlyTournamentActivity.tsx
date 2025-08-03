@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import { supabase } from "@/lib/supabase";
 
 interface MonthlyData {
   month: string;
@@ -33,16 +32,16 @@ export default function MonthlyTournamentActivity() {
 
   useEffect(() => {
     async function fetchMonthlyData() {
-      const { data: tournamentData, error } = await supabase
-        .from("wta")
-        .select("tourney_date, tourney_id")
-        .not("tourney_date", "is", null);
-
-      if (error) {
-        console.error("Error fetching tournament data:", error);
-        setLoading(false);
-        return;
-      }
+      const matchData = await prisma.wta.findMany({
+        where: {
+          winner_age: { not: null },
+          loser_age: { not: null },
+        },
+        select: {
+          winner_age: true,
+          loser_age: true,
+        },
+      });
 
       // Group by month
       const monthlyStats: Record<
@@ -50,7 +49,7 @@ export default function MonthlyTournamentActivity() {
         { matches: number; tournaments: Set<string> }
       > = {};
 
-      tournamentData.forEach((match) => {
+      matchData.forEach((match) => {
         if (match.tourney_date) {
           const date = new Date(match.tourney_date);
           const month = date.getMonth();

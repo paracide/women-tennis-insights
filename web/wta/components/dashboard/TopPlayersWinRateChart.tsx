@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import { supabase } from "@/lib/supabase";
+import prisma from "@/lib/prisma";
 
 interface PlayerWinRate {
   name: string;
@@ -20,17 +20,16 @@ export default function TopPlayersWinRateChart() {
 
   useEffect(() => {
     async function fetchPlayerWinRates() {
-      const { data: matches, error } = await supabase
-        .from("wta")
-        .select("winner_name, loser_name")
-        .not("winner_name", "is", null)
-        .not("loser_name", "is", null);
-
-      if (error) {
-        console.error("Error fetching match data:", error);
-        setLoading(false);
-        return;
-      }
+      const matches = await prisma.wta.findMany({
+        where: {
+          winner_name: { not: null },
+          loser_name: { not: null },
+        },
+        select: {
+          winner_name: true,
+          loser_name: true,
+        },
+      });
 
       // Calculate win/loss records
       const playerStats: Record<string, { wins: number; losses: number }> = {};

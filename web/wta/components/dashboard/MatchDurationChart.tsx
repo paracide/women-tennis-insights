@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import { supabase } from "@/lib/supabase";
+import prisma from "@/lib/prisma";
 
 interface DurationData {
   range: string;
@@ -17,17 +17,17 @@ export default function MatchDurationChart() {
 
   useEffect(() => {
     async function fetchDurationData() {
-      const { data: matchData, error } = await supabase
-        .from("wta")
-        .select("minutes")
-        .not("minutes", "is", null)
-        .gt("minutes", 0);
-
-      if (error) {
-        console.error("Error fetching duration data:", error);
-        setLoading(false);
-        return;
-      }
+      const matchData = await prisma.wta.findMany({
+        where: {
+          minutes: {
+            not: null,
+            gt: 0,
+          },
+        },
+        select: {
+          minutes: true,
+        },
+      });
 
       // Create duration ranges (in minutes)
       const durationRanges = [

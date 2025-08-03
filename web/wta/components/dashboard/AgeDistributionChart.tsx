@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import { supabase } from "@/lib/supabase";
+import prisma from "@/lib/prisma";
 
 interface AgeData {
   ageRange: string;
@@ -18,17 +18,15 @@ export default function AgeDistributionChart() {
 
   useEffect(() => {
     async function fetchAgeData() {
-      const { data: matchData, error } = await supabase
-        .from("wta")
-        .select("winner_age, loser_age")
-        .not("winner_age", "is", null)
-        .not("loser_age", "is", null);
-
-      if (error) {
-        console.error("Error fetching age data:", error);
-        setLoading(false);
-        return;
-      }
+      const matchData = await prisma.wta.findMany({
+        where: {
+          NOT: [{ winner_age: null }, { loser_age: null }],
+        },
+        select: {
+          winner_age: true,
+          loser_age: true,
+        },
+      });
 
       // Create age ranges
       const ageRanges = [

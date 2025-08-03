@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import { supabase } from "@/lib/supabase";
+import prisma from "@/lib/prisma";
 
 interface TournamentLevelData {
   name: string;
@@ -25,16 +25,16 @@ export default function TournamentLevelChart() {
 
   useEffect(() => {
     async function fetchTournamentLevels() {
-      const { data: tournamentData, error } = await supabase
-        .from("wta")
-        .select("tourney_level")
-        .not("tourney_level", "is", null);
-
-      if (error) {
-        console.error("Error fetching tournament level data:", error);
-        setLoading(false);
-        return;
-      }
+      const tournamentData = await prisma.wta.findMany({
+        where: {
+          tourney_level: {
+            not: null,
+          },
+        },
+        select: {
+          tourney_level: true,
+        },
+      });
 
       // Count tournament levels
       const levelCounts = tournamentData.reduce(
