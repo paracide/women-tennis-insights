@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import prisma from "@/lib/prisma";
 
 interface TournamentLevelData {
   name: string;
@@ -25,32 +24,8 @@ export default function TournamentLevelChart() {
 
   useEffect(() => {
     async function fetchTournamentLevels() {
-      const tournamentData = await prisma.wta.findMany({
-        where: {
-          tourney_level: {
-            not: null,
-          },
-        },
-        select: {
-          tourney_level: true,
-        },
-      });
-
-      // Count tournament levels
-      const levelCounts = tournamentData.reduce(
-        (acc: Record<string, number>, tournament) => {
-          const level = tournament.tourney_level || "Other";
-          acc[level] = (acc[level] || 0) + 1;
-          return acc;
-        },
-        {},
-      );
-
-      const chartData = Object.entries(levelCounts).map(([level, value]) => ({
-        name: LEVEL_LABELS[level as keyof typeof LEVEL_LABELS] || level,
-        value,
-      }));
-
+      const res = await fetch("/api/wta/tournamentLevel");
+      const chartData: TournamentLevelData[] = await res.json();
       setData(chartData);
       setLoading(false);
     }

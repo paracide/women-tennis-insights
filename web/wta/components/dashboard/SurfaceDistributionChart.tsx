@@ -1,7 +1,8 @@
+"use client";
+
 import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import prisma from "@/lib/prisma";
 
 interface SurfaceData {
   name: string;
@@ -15,32 +16,8 @@ export default function SurfaceDistributionChart() {
 
   useEffect(() => {
     async function fetchSurfaceData() {
-      const surfaceData = await prisma.wta.findMany({
-        where: {
-          surface: {
-            not: null,
-          },
-        },
-        select: {
-          surface: true,
-        },
-      });
-
-      // Count surfaces
-      const surfaceCounts = surfaceData.reduce(
-        (acc: Record<string, number>, match) => {
-          const surface = match.surface || "Unknown";
-          acc[surface] = (acc[surface] || 0) + 1;
-          return acc;
-        },
-        {},
-      );
-
-      const chartData = Object.entries(surfaceCounts).map(([name, value]) => ({
-        name,
-        value,
-      }));
-
+      const res = await fetch("/api/wta/surfaceData");
+      const chartData: SurfaceData[] = await res.json();
       setData(chartData);
       setLoading(false);
     }

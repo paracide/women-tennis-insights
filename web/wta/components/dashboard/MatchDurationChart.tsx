@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import prisma from "@/lib/prisma";
 
 interface DurationData {
   range: string;
@@ -17,40 +16,8 @@ export default function MatchDurationChart() {
 
   useEffect(() => {
     async function fetchDurationData() {
-      const matchData = await prisma.wta.findMany({
-        where: {
-          minutes: {
-            not: null,
-            gt: 0,
-          },
-        },
-        select: {
-          minutes: true,
-        },
-      });
-
-      // Create duration ranges (in minutes)
-      const durationRanges = [
-        { range: "0-60", min: 0, max: 60 },
-        { range: "61-90", min: 61, max: 90 },
-        { range: "91-120", min: 91, max: 120 },
-        { range: "121-150", min: 121, max: 150 },
-        { range: "151-180", min: 151, max: 180 },
-        { range: "181+", min: 181, max: Number.POSITIVE_INFINITY },
-      ];
-
-      const durationStats = durationRanges.map(({ range, min, max }) => {
-        const count = matchData.filter(
-          (match) =>
-            match.minutes && match.minutes >= min && match.minutes <= max,
-        ).length;
-
-        return {
-          range,
-          count,
-        };
-      });
-
+      const res = await fetch("/api/wta/durationData");
+      const durationStats: DurationData[] = await res.json();
       setData(durationStats);
       setLoading(false);
     }

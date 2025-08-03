@@ -3,7 +3,6 @@
 import { useEffect, useRef, useState } from "react";
 import * as echarts from "echarts";
 import { Card, CardBody, CardHeader } from "@heroui/card";
-import prisma from "@/lib/prisma";
 
 interface AgeData {
   ageRange: string;
@@ -18,49 +17,11 @@ export default function AgeDistributionChart() {
 
   useEffect(() => {
     async function fetchAgeData() {
-      const matchData = await prisma.wta.findMany({
-        where: {
-          NOT: [{ winner_age: null }, { loser_age: null }],
-        },
-        select: {
-          winner_age: true,
-          loser_age: true,
-        },
-      });
-
-      // Create age ranges
-      const ageRanges = [
-        { range: "16-20", min: 16, max: 20 },
-        { range: "21-25", min: 21, max: 25 },
-        { range: "26-30", min: 26, max: 30 },
-        { range: "31-35", min: 31, max: 35 },
-        { range: "36-40", min: 36, max: 40 },
-      ];
-
-      const ageStats = ageRanges.map(({ range, min, max }) => {
-        const winners = matchData.filter(
-          (match) =>
-            match.winner_age &&
-            match.winner_age >= min &&
-            match.winner_age <= max,
-        ).length;
-
-        const losers = matchData.filter(
-          (match) =>
-            match.loser_age && match.loser_age >= min && match.loser_age <= max,
-        ).length;
-
-        return {
-          ageRange: range,
-          winners,
-          losers,
-        };
-      });
-
+      const res = await fetch("/api/wta/ageData");
+      const ageStats: AgeData[] = await res.json();
       setData(ageStats);
       setLoading(false);
     }
-
     fetchAgeData();
   }, []);
 
@@ -72,17 +33,9 @@ export default function AgeDistributionChart() {
     const option = {
       tooltip: {
         trigger: "axis",
-        axisPointer: {
-          type: "cross",
-          label: {
-            backgroundColor: "#6a7985",
-          },
-        },
+        axisPointer: { type: "cross", label: { backgroundColor: "#6a7985" } },
       },
-      legend: {
-        data: ["Winners", "Losers"],
-        top: "10%",
-      },
+      legend: { data: ["Winners", "Losers"], top: "10%" },
       grid: {
         left: "3%",
         right: "4%",
@@ -97,11 +50,7 @@ export default function AgeDistributionChart() {
           data: data.map((item) => item.ageRange),
         },
       ],
-      yAxis: [
-        {
-          type: "value",
-        },
-      ],
+      yAxis: [{ type: "value" }],
       series: [
         {
           name: "Winners",
@@ -113,14 +62,10 @@ export default function AgeDistributionChart() {
               { offset: 1, color: "rgba(16, 185, 129, 0.1)" },
             ]),
           },
-          emphasis: {
-            focus: "series",
-          },
+          emphasis: { focus: "series" },
           data: data.map((item) => item.winners),
           smooth: true,
-          itemStyle: {
-            color: "#10b981",
-          },
+          itemStyle: { color: "#10b981" },
         },
         {
           name: "Losers",
@@ -132,14 +77,10 @@ export default function AgeDistributionChart() {
               { offset: 1, color: "rgba(239, 68, 68, 0.1)" },
             ]),
           },
-          emphasis: {
-            focus: "series",
-          },
+          emphasis: { focus: "series" },
           data: data.map((item) => item.losers),
           smooth: true,
-          itemStyle: {
-            color: "#ef4444",
-          },
+          itemStyle: { color: "#ef4444" },
         },
       ],
     };
