@@ -17,9 +17,6 @@ ranking_all = pd.concat([
 ], ignore_index=True)
 
 ranking_all = ranking_all[ranking_all['rank'] <= 100]
-
 ranking_all['ranking_date'] = pd.to_datetime(ranking_all['ranking_date'], format='%Y%m%d', errors='coerce')
-
 ranking_all = ranking_all.dropna(subset=['ranking_date'])
-
 ranking_all.to_csv('../data/proceed/ranking_all.csv', index=False)
