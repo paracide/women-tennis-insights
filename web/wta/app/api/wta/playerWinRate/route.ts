@@ -43,7 +43,7 @@ export async function GET() {
       };
     })
     .filter((player) => player.totalMatches >= 20)
-    .sort((a, b) => b.winRate - a.winRate) // 注意这里要倒序显示最高胜率
+    .sort((a, b) => b.winRate - a.winRate) 
     .slice(0, 15);
 
   return NextResponse.json(playerWinRates);
