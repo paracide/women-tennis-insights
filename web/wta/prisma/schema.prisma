@@ -18,7 +18,6 @@ model players {
   height                     Int?
   wikidata_id                String?
   ranking_100                ranking_100[]
-  rankings_current           rankings_current[]
   wta_wta_winner_idToplayers wta[]              @relation("wta_winner_idToplayers")
   wta_wta_loser_idToplayers  wta[]              @relation("wta_loser_idToplayers")
 }
@@ -31,16 +30,6 @@ model ranking_100 {
   tours        Int?
   id           Int      @id @default(autoincrement())
   players      players? @relation(fields: [player], references: [player_id], onDelete: NoAction, onUpdate: NoAction, map: "ranking_100_players_player_id_fk")
-}
-
-model rankings_current {
-  ranking_date BigInt?
-  rank         BigInt?
-  player       BigInt?
-  points       BigInt?
-  tours        String?
-  id           Int      @id @default(autoincrement())
-  players      players? @relation(fields: [player], references: [player_id], onDelete: NoAction, onUpdate: NoAction, map: "rankings_current_players_player_id_fk")
 }
 
 model wta {
