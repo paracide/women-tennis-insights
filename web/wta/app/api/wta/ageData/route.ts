@@ -26,15 +26,15 @@ export async function GET() {
     const winners = matchData.filter(
       (match) =>
         match.winner_age !== null &&
-        match.winner_age >= min &&
-        match.winner_age <= max,
+        match.winner_age.toNumber() >= min &&
+        match.winner_age.toNumber() <= max,
     ).length;
 
     const losers = matchData.filter(
       (match) =>
         match.loser_age !== null &&
-        match.loser_age >= min &&
-        match.loser_age <= max,
+        match.loser_age.toNumber() >= min &&
+        match.loser_age.toNumber() <= max,
     ).length;
 
     return {
