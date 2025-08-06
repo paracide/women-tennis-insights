@@ -12,6 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
+import { PlayerChart } from "@/components/player-chart"; // New ECharts component
 
 // Basic player info for search results
 interface PlayerBasicInfo {
@@ -31,6 +32,18 @@ interface PlayerDetails extends PlayerBasicInfo {
   latest_rank_date: string | null; // Date string (e.g., "YYYY-MM-DD")
 }
 
+interface Match {
+  tourney_id: string;
+  tourney_name: string;
+  surface: string;
+  tourney_level: string;
+  tourney_date: string; // Date string
+  winner_name: string;
+  loser_name: string;
+  score: string;
+  round: string;
+}
+
 export default function PlayerComparisonPage() {
   const [player1, setPlayer1] = useState<PlayerBasicInfo | null>(null);
   const [player2, setPlayer2] = useState<PlayerBasicInfo | null>(null);
@@ -41,8 +54,48 @@ export default function PlayerComparisonPage() {
     null,
   );
   const [loadingDetails, setLoadingDetails] = useState(false);
+  const [matchHistory, setMatchHistory] = useState<Match[]>([]);
+  const [loadingMatches, setLoadingMatches] = useState(false);
 
-  // Effect to fetch details for Player 1 when selected
+  // Initial load: Fetch Top 1 and Top 2 players
+  useEffect(() => {
+    const fetchTopPlayers = async () => {
+      setLoadingDetails(true);
+      try {
+        const res = await fetch(`/api/wta/player?topPlayers=true`);
+        if (res.ok) {
+          const data: PlayerDetails[] = await res.json();
+          if (data.length >= 1) {
+            setPlayer1({
+              player_id: data[0].player_id,
+              name_first: data[0].name_first,
+              name_last: data[0].name_last,
+              ioc: data[0].ioc,
+            });
+            setPlayer1Details(data[0]);
+          }
+          if (data.length >= 2) {
+            setPlayer2({
+              player_id: data[1].player_id,
+              name_first: data[1].name_first,
+              name_last: data[1].name_last,
+              ioc: data[1].ioc,
+            });
+            setPlayer2Details(data[1]);
+          }
+        } else {
+          console.error("Failed to fetch top players");
+        }
+      } catch (error) {
+        console.error("Error fetching top players:", error);
+      } finally {
+        setLoadingDetails(false);
+      }
+    };
+    fetchTopPlayers();
+  }, []); // Run only once on mount
+
+  // Effect to fetch details for Player 1 when selected (existing logic, but ensure it updates player1Details)
   useEffect(() => {
     const fetchDetails = async (
       playerId: number | null,
@@ -73,7 +126,7 @@ export default function PlayerComparisonPage() {
     fetchDetails(player1?.player_id || null, setPlayer1Details);
   }, [player1]);
 
-  // Effect to fetch details for Player 2 when selected
+  // Effect to fetch details for Player 2 when selected (existing logic, but ensure it updates player2Details)
   useEffect(() => {
     const fetchDetails = async (
       playerId: number | null,
@@ -104,7 +157,36 @@ export default function PlayerComparisonPage() {
     fetchDetails(player2?.player_id || null, setPlayer2Details);
   }, [player2]);
 
-  // Helper function to calculate age from date of birth
+  // Effect to fetch head-to-head matches when both players are selected
+  useEffect(() => {
+    const fetchMatches = async () => {
+      if (player1?.player_id && player2?.player_id) {
+        setLoadingMatches(true);
+        try {
+          const res = await fetch(
+            `/api/wta/player?player1Id=${player1.player_id}&player2Id=${player2.player_id}`,
+          );
+          if (res.ok) {
+            const data: Match[] = await res.json();
+            setMatchHistory(data);
+          } else {
+            console.error("Failed to fetch match history");
+            setMatchHistory([]);
+          }
+        } catch (error) {
+          console.error("Error fetching match history:", error);
+          setMatchHistory([]);
+        } finally {
+          setLoadingMatches(false);
+        }
+      } else {
+        setMatchHistory([]);
+      }
+    };
+    fetchMatches();
+  }, [player1, player2]);
+
+  // Helper function to calculate age from date of birth (remains the same)
   const calculateAge = (dob: string | null) => {
     if (!dob) return "N/A";
     const birthDate = new Date(dob);
@@ -117,13 +199,14 @@ export default function PlayerComparisonPage() {
     return age;
   };
 
+  // Helper function to render player detail cards (updated to use shadcn Card)
   const renderPlayerCard = (player: PlayerDetails | null, title: string) => (
-    <Card className="flex-1 min-w-[300px]">
-      <CardHeader></CardHeader>
-      <CardBody>
+    <Card className="flex-1 min-w-[300px] shadow-lg">
+      <CardHeader>{title}</CardHeader>
+      <CardBody className="p-6">
         {player ? (
-          <div className="space-y-2">
-            <p className="text-lg font-semibold">
+          <div className="space-y-3 text-sm text-white">
+            <p className="text-lg font-semibold text-white">
               {player.name_first} {player.name_last} ({player.ioc})
             </p>
             <p>
@@ -163,8 +246,10 @@ export default function PlayerComparisonPage() {
   );
 
   return (
-    <div className="container mx-auto p-4 md:p-6">
-      <h1 className="text-3xl font-bold mb-6 text-center">Player Comparison</h1>
+    <div className="container mx-auto p-4 md:p-8  min-h-screen font-sans">
+      <h1 className="text-4xl font-extrabold mb-10 text-center text-white">
+        Tennis Player Data Analysis
+      </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div>
@@ -176,122 +261,117 @@ export default function PlayerComparisonPage() {
           />
         </div>
         <div>
-          <h2 className="text-xl font-semibold mb-3">Player 2</h2>
-          <PlayerSearchInput
-            onSelectPlayer={setPlayer2}
-            selectedPlayer={player2}
-            placeholder="Search for Player 2"
-          />
+          <div>
+            <h2 className="text-xl font-semibold mb-3">Player 2</h2>
+            <PlayerSearchInput
+              onSelectPlayer={setPlayer2}
+              selectedPlayer={player2}
+              placeholder="Search for Player 2"
+            />
+          </div>
         </div>
       </div>
 
       {loadingDetails && (player1 || player2) && (
-        <div className="text-center text-muted-foreground mb-8">
+        <div className="text-center text-lg text-blue-600 mb-8 animate-pulse">
           Loading player details...
         </div>
       )}
 
-      <div className="flex flex-col md:flex-row gap-6 mb-8">
-        {renderPlayerCard(player1Details, "Player 1 Details")}
-        {renderPlayerCard(player2Details, "Player 2 Details")}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
+        {renderPlayerCard(player1Details, "Player 1 Profile")}
+        {renderPlayerCard(player2Details, "Player 2 Profile")}
       </div>
 
+      {(player1Details || player2Details) && (
+        <Card className="mb-10 shadow-lg  ">
+          <CardHeader className="  ">Attribute Comparison Chart</CardHeader>
+          <CardBody className="p-6">
+            <PlayerChart player1={player1Details} player2={player2Details} />
+          </CardBody>
+        </Card>
+      )}
+
       {player1Details && player2Details && (
-        <Card>
-          <CardHeader>Comparison</CardHeader>
-          <CardBody>
-            <Table aria-label="Player Comparison Table">
-              <TableHeader>
-                <TableColumn>Attribute</TableColumn>
-                <TableColumn className="text-center">
-                  {player1Details.name_first} {player1Details.name_last}
-                </TableColumn>
-                <TableColumn className="text-center">
-                  {player2Details.name_first} {player2Details.name_last}
-                </TableColumn>
-              </TableHeader>
-              <TableBody>
-                <TableRow key="hand">
-                  <TableCell>Hand</TableCell>
-                  <TableCell className="text-center">
-                    {player1Details.hand || "N/A"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {player2Details.hand || "N/A"}
-                  </TableCell>
-                </TableRow>
-                <TableRow key="height">
-                  <TableCell>Height</TableCell>
-                  <TableCell className="text-center">
-                    {player1Details.height
-                      ? `${player1Details.height} cm`
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {player2Details.height
-                      ? `${player2Details.height} cm`
-                      : "N/A"}
-                  </TableCell>
-                </TableRow>
-                <TableRow key="age">
-                  <TableCell>Age</TableCell>
-                  <TableCell className="text-center">
-                    {calculateAge(player1Details.dob)}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {calculateAge(player2Details.dob)}
-                  </TableCell>
-                </TableRow>
-                <TableRow key="ioc">
-                  <TableCell>Country (IOC)</TableCell>
-                  <TableCell className="text-center">
-                    {player1Details.ioc || "N/A"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {player2Details.ioc || "N/A"}
-                  </TableCell>
-                </TableRow>
-                <TableRow key="rank">
-                  <TableCell>Latest Rank</TableCell>
-                  <TableCell className="text-center">
-                    {player1Details.latest_rank !== null
-                      ? player1Details.latest_rank
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {player2Details.latest_rank !== null
-                      ? player2Details.latest_rank
-                      : "N/A"}
-                  </TableCell>
-                </TableRow>
-                <TableRow key="points">
-                  <TableCell>Latest Points</TableCell>
-                  <TableCell className="text-center">
-                    {player1Details.latest_points !== null
-                      ? player1Details.latest_points
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {player2Details.latest_points !== null
-                      ? player2Details.latest_points
-                      : "N/A"}
-                  </TableCell>
-                </TableRow>
-                <TableRow key="rankDate">
-                  <TableCell>Latest Rank Date</TableCell>
-                  <TableCell className="text-center">
-                    {player1Details.latest_rank_date
-                      ? format(new Date(player1Details.latest_rank_date), "PPP")
-                      : "N/A"}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    {player2Details.latest_rank_date
-                      ? format(new Date(player2Details.latest_rank_date), "PPP")
-                      : "N/A"}
-                  </TableCell>
-                </TableRow>
-              </TableBody>
-            </Table>
+        <Card className="shadow-lg  ">
+          <CardHeader className="  ">Head-to-Head Match History</CardHeader>
+          <CardBody className="p-6">
+            {loadingMatches ? (
+              <div className="text-center text-lg text-blue-600 animate-pulse">
+                Loading match history...
+              </div>
+            ) : matchHistory.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableColumn className="text-gray-600 font-semibold">
+                    Date
+                  </TableColumn>
+                  <TableColumn className="text-gray-600 font-semibold">
+                    Tournament
+                  </TableColumn>
+                  <TableColumn className="text-gray-600 font-semibold">
+                    Level
+                  </TableColumn>
+                  <TableColumn className="text-gray-600 font-semibold">
+                    Surface
+                  </TableColumn>
+                  <TableColumn className="text-gray-600 font-semibold">
+                    Winner
+                  </TableColumn>
+                  <TableColumn className="text-gray-600 font-semibold">
+                    Loser
+                  </TableColumn>
+                  <TableColumn className="text-gray-600 font-semibold">
+                    Score
+                  </TableColumn>
+                  <TableColumn className="text-gray-600 font-semibold">
+                    Round
+                  </TableColumn>
+                </TableHeader>
+                <TableBody>
+                  {matchHistory.map((match, index) => (
+                    <TableRow key={index}>
+                      <TableCell>
+                        {format(new Date(match.tourney_date), "PPP")}
+                      </TableCell>
+                      <TableCell>{match.tourney_name}</TableCell>
+                      <TableCell>{match.tourney_level}</TableCell>
+                      <TableCell>{match.surface}</TableCell>
+                      <TableCell
+                        className={
+                          match.winner_name ===
+                            `${player1Details.name_first} ${player1Details.name_last}` ||
+                          match.winner_name ===
+                            `${player2Details.name_first} ${player2Details.name_last}`
+                            ? "font-semibold text-green-700"
+                            : ""
+                        }
+                      >
+                        {match.winner_name}
+                      </TableCell>
+                      <TableCell
+                        className={
+                          match.loser_name ===
+                            `${player1Details.name_first} ${player1Details.name_last}` ||
+                          match.loser_name ===
+                            `${player2Details.name_first} ${player2Details.name_last}`
+                            ? "font-semibold text-red-700"
+                            : ""
+                        }
+                      >
+                        {match.loser_name}
+                      </TableCell>
+                      <TableCell>{match.score}</TableCell>
+                      <TableCell>{match.round}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            ) : (
+              <p className="text-center text-muted-foreground py-4">
+                No head-to-head matches found between these players.
+              </p>
+            )}
           </CardBody>
         </Card>
       )}
