@@ -79,13 +79,13 @@ export async function GET(request: NextRequest) {
       });
 
       const formattedTopPlayers = topPlayersData.map((r) => ({
-        player_id: r.players.player_id,
-        name_first: r.players.name_first,
-        name_last: r.players.name_last,
-        ioc: r.players.ioc,
-        hand: r.players.hand,
-        dob: r.players.dob ? r.players.dob.toISOString().split("T")[0] : null,
-        height: r.players.height,
+        player_id: r.players?.player_id ?? null,
+        name_first: r.players?.name_first ?? "",
+        name_last: r.players?.name_last ?? "",
+        ioc: r.players?.ioc ?? "",
+        hand: r.players?.hand ?? "",
+        dob: r.players?.dob ? r.players.dob.toISOString().split("T")[0] : null,
+        height: r.players?.height ?? null,
         latest_rank: r.rank,
         latest_points: r.points,
         latest_rank_date: r.ranking_date,
