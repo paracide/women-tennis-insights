@@ -12,7 +12,7 @@ import {
   TableHeader,
   TableRow,
 } from "@heroui/table";
-import { PlayerChart } from "@/components/player-chart"; // New ECharts component
+import { PlayerRankingChart } from "@/components/player-ranking-chart"; // New ECharts component
 
 // Basic player info for search results
 interface PlayerBasicInfo {
@@ -20,6 +20,12 @@ interface PlayerBasicInfo {
   name_first: string;
   name_last: string;
   ioc: string;
+}
+
+interface RankingData {
+  ranking_date: string | null;
+  rank: number | null;
+  points: number | null;
 }
 
 // Detailed player info for comparison
@@ -56,6 +62,13 @@ export default function PlayerComparisonPage() {
   const [loadingDetails, setLoadingDetails] = useState(false);
   const [matchHistory, setMatchHistory] = useState<Match[]>([]);
   const [loadingMatches, setLoadingMatches] = useState(false);
+  const [player1RankingHistory, setPlayer1RankingHistory] = useState<
+    RankingData[]
+  >([]);
+  const [player2RankingHistory, setPlayer2RankingHistory] = useState<
+    RankingData[]
+  >([]);
+  const [loadingRankingHistory, setLoadingRankingHistory] = useState(false);
 
   // Initial load: Fetch Top 1 and Top 2 players
   useEffect(() => {
@@ -186,6 +199,78 @@ export default function PlayerComparisonPage() {
     fetchMatches();
   }, [player1, player2]);
 
+  // Effect to fetch ranking history for Player 1
+  useEffect(() => {
+    const fetchRankingHistory = async (
+      playerId: number | null,
+      setHistory: (history: RankingData[]) => void,
+    ) => {
+      if (!playerId) {
+        setHistory([]);
+        return;
+      }
+      setLoadingRankingHistory(true);
+      try {
+        const res = await fetch(`/api/wta/player?historyPlayerId=${playerId}`);
+        if (res.ok) {
+          const data: RankingData[] = await res.json();
+          setHistory(data);
+        } else {
+          console.error(
+            `Failed to fetch ranking history for player ${playerId}`,
+          );
+          setHistory([]);
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching ranking history for player ${playerId}:`,
+          error,
+        );
+        setHistory([]);
+      } finally {
+        setLoadingRankingHistory(false);
+      }
+    };
+
+    fetchRankingHistory(player1?.player_id || null, setPlayer1RankingHistory);
+  }, [player1]);
+
+  // Effect to fetch ranking history for Player 2
+  useEffect(() => {
+    const fetchRankingHistory = async (
+      playerId: number | null,
+      setHistory: (history: RankingData[]) => void,
+    ) => {
+      if (!playerId) {
+        setHistory([]);
+        return;
+      }
+      setLoadingRankingHistory(true);
+      try {
+        const res = await fetch(`/api/wta/player?historyPlayerId=${playerId}`);
+        if (res.ok) {
+          const data: RankingData[] = await res.json();
+          setHistory(data);
+        } else {
+          console.error(
+            `Failed to fetch ranking history for player ${playerId}`,
+          );
+          setHistory([]);
+        }
+      } catch (error) {
+        console.error(
+          `Error fetching ranking history for player ${playerId}:`,
+          error,
+        );
+        setHistory([]);
+      } finally {
+        setLoadingRankingHistory(false);
+      }
+    };
+
+    fetchRankingHistory(player2?.player_id || null, setPlayer2RankingHistory);
+  }, [player2]);
+
   // Helper function to calculate age from date of birth (remains the same)
   const calculateAge = (dob: string | null) => {
     if (!dob) return "N/A";
@@ -283,14 +368,37 @@ export default function PlayerComparisonPage() {
         {renderPlayerCard(player2Details, "Player 2 Profile")}
       </div>
 
-      {(player1Details || player2Details) && (
-        <Card className="mb-10 shadow-lg  ">
-          <CardHeader className="  ">Attribute Comparison Chart</CardHeader>
-          <CardBody className="p-6">
-            <PlayerChart player1={player1Details} player2={player2Details} />
-          </CardBody>
-        </Card>
-      )}
+      {(player1Details || player2Details) &&
+        (player1RankingHistory.length > 0 ||
+          player2RankingHistory.length > 0) && (
+          <Card className="mb-10">
+            <CardHeader className="text-white">
+              Historical Ranking Trend
+            </CardHeader>
+            <CardBody className="p-6">
+              {loadingRankingHistory ? (
+                <div className="text-center text-lg text-blue-600 animate-pulse">
+                  Loading ranking history...
+                </div>
+              ) : (
+                <PlayerRankingChart
+                  player1Name={
+                    player1Details
+                      ? `${player1Details.name_first} ${player1Details.name_last}`
+                      : null
+                  }
+                  player1RankingHistory={player1RankingHistory}
+                  player2Name={
+                    player2Details
+                      ? `${player2Details.name_first} ${player2Details.name_last}`
+                      : null
+                  }
+                  player2RankingHistory={player2RankingHistory}
+                />
+              )}
+            </CardBody>
+          </Card>
+        )}
 
       {player1Details && player2Details && (
         <Card className="shadow-lg  ">

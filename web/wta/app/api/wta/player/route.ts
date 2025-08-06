@@ -1,16 +1,40 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma"; // Assuming you have a prisma client setup at lib/prisma
+import prisma from "@/lib/prisma";
 
 export async function GET(request: NextRequest) {
   const searchParams = request.nextUrl.searchParams;
   const searchQuery = searchParams.get("search");
   const playerId = searchParams.get("id");
-  const topPlayers = searchParams.get("topPlayers"); // New param for top players
-  const player1Id = searchParams.get("player1Id"); // New param for head-to-head
-  const player2Id = searchParams.get("player2Id"); // New param for head-to-head
+  const topPlayers = searchParams.get("topPlayers");
+  const player1Id = searchParams.get("player1Id");
+  const player2Id = searchParams.get("player2Id");
+  const historyPlayerId = searchParams.get("historyPlayerId"); // New param for historical ranking
 
   try {
-    if (topPlayers === "true") {
+    if (historyPlayerId) {
+      // Fetch historical ranking data for a specific player
+      const rankingHistory = await prisma.ranking_100.findMany({
+        where: {
+          player: parseInt(historyPlayerId),
+        },
+        orderBy: {
+          ranking_date: "asc", // Order by date ascending for chart
+        },
+        select: {
+          ranking_date: true,
+          rank: true,
+          points: true,
+        },
+      });
+
+      const formattedHistory = rankingHistory.map((r) => ({
+        ranking_date: r.ranking_date,
+        rank: r.rank,
+        points: r.points,
+      }));
+
+      return NextResponse.json(formattedHistory);
+    } else if (topPlayers === "true") {
       // Fetch the latest ranking date
       const latestRankingDateResult = await prisma.ranking_100.findFirst({
         orderBy: {
@@ -60,11 +84,11 @@ export async function GET(request: NextRequest) {
         name_last: r.players.name_last,
         ioc: r.players.ioc,
         hand: r.players.hand,
-        dob: r.players.dob ? r.players.dob.toISOString().split("T")[0] : null, // Format date to string
+        dob: r.players.dob ? r.players.dob.toISOString().split("T")[0] : null,
         height: r.players.height,
         latest_rank: r.rank,
         latest_points: r.points,
-        latest_rank_date: r.ranking_date, // Format date to string
+        latest_rank_date: r.ranking_date,
       }));
 
       return NextResponse.json(formattedTopPlayers);
@@ -84,7 +108,7 @@ export async function GET(request: NextRequest) {
           ],
         },
         orderBy: {
-          tourney_date: "desc", // Order by most recent matches first
+          tourney_date: "desc",
         },
         select: {
           tourney_id: true,
