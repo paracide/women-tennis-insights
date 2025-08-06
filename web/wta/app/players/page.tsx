@@ -119,7 +119,7 @@ export default function PlayerComparisonPage() {
 
   const renderPlayerCard = (player: PlayerDetails | null, title: string) => (
     <Card className="flex-1 min-w-[300px]">
-      <CardHeader>{title}</CardHeader>
+      <CardHeader></CardHeader>
       <CardBody>
         {player ? (
           <div className="space-y-2">

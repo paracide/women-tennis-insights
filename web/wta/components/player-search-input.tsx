@@ -55,7 +55,6 @@ export function PlayerSearchInput({
     return () => clearTimeout(delayDebounceFn);
   }, [searchQuery]);
 
-  // Set initial search query if a player is already selected
   useEffect(() => {
     if (selectedPlayer) {
       setSearchQuery(
@@ -96,13 +95,8 @@ export function PlayerSearchInput({
           className="pr-10"
         />
         {selectedPlayer && (
-          <Button
-            variant="ghost"
-            size="sm"
-            onPress={handleClear}
-            className="absolute right-1 top-1/2 -translate-y-1/2"
-          >
-            <span className="sr-only">Clear search</span>
+          <Button color="default" variant="shadow" onPress={handleClear}>
+            Clear search
           </Button>
         )}
       </div>
@@ -119,7 +113,7 @@ export function PlayerSearchInput({
             {searchResults.map((player) => (
               <div
                 key={player.player_id}
-                className="flex items-center gap-3 p-2 cursor-pointer hover:bg-accent hover:text-accent-foreground"
+                className="flex items-center gap-3 p-2 cursor-pointer z-50 bg-gray-600 duration-200 hover:bg-gray-100 hover:text-black"
                 // Prevent input blur when clicking on a suggestion
                 onMouseDown={(e) => e.preventDefault()}
                 onClick={() => handleSelect(player)}
