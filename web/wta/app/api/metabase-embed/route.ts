@@ -1,5 +1,5 @@
-import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import { NextResponse } from "next/server";
+import jwt from "jsonwebtoken";
 
 // Use environment variables for sensitive data.
 // It's a good practice to use a naming convention like NEXT_PUBLIC_... for public variables,
@@ -17,7 +17,10 @@ interface MetabasePayload {
 export async function GET(request: Request): Promise<NextResponse> {
   // Always check for the secret key in a production environment.
   if (!METABASE_SECRET_KEY) {
-    return NextResponse.json({ error: "Metabase secret key not configured." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Metabase secret key not configured." },
+      { status: 500 },
+    );
   }
 
   // You can get dashboard ID or other parameters from the request query if needed.
@@ -27,7 +30,7 @@ export async function GET(request: Request): Promise<NextResponse> {
   const payload: MetabasePayload = {
     resource: { dashboard: 33 }, // Example dashboard ID. You can make this dynamic.
     params: {},
-    exp: Math.round(Date.now() / 1000) + (10 * 60) // 10 minute expiration
+    exp: Math.round(Date.now() / 1000) + 10 * 60, // 10 minute expiration
   };
 
   try {
@@ -38,6 +41,9 @@ export async function GET(request: Request): Promise<NextResponse> {
     return NextResponse.json({ iframeUrl });
   } catch (error) {
     console.error("JWT signing error:", error);
-    return NextResponse.json({ error: "Failed to generate embed URL." }, { status: 500 });
+    return NextResponse.json(
+      { error: "Failed to generate embed URL." },
+      { status: 500 },
+    );
   }
 }

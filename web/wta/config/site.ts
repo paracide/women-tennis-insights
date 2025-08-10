@@ -2,12 +2,25 @@ export type SiteConfig = typeof siteConfig;
 
 export const siteConfig = {
   name: "Women's Tennis Insights",
-  description: "This is project aims to analyze and visualize the performance of women's tennis players using data from the WTA.\n",
+  description:
+    "This is project aims to analyze and visualize the performance of women's tennis players using data from the WTA.\n",
   navItems: [
     {
       label: "Home",
       href: "/",
-    }
+    },
+    {
+      label: "Ranking",
+      href: "/ranking",
+    },
+    {
+      label: "BI",
+      href: "/bi",
+    },
+    {
+      label: "Players",
+      href: "/players",
+    },
   ],
   navMenuItems: [
     {
