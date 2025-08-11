@@ -54,7 +54,6 @@ export async function GET(request: NextRequest) {
 
       const latestDate = latestRankingDateResult.ranking_date;
 
-      // Fetch top 2 players based on the latest ranking date
       const topPlayersData = await prisma.ranking_100.findMany({
         where: {
           ranking_date: latestDate,
@@ -138,6 +137,14 @@ export async function GET(request: NextRequest) {
           dob: true,
           ioc: true,
           height: true,
+          ace_avg_last_10_matches: true,
+          df_avg_last_10_matches: true,
+          first_in_avg_last_10_matches: true,
+          first_won_avg_last_10_matches: true,
+          svpt_avg_last_10_matches: true,
+          bp_faced_avg_last_10_matches: true,
+          bp_saved_avg_last_10_matches: true,
+          win_rate_last_10_matches: true,
           ranking_100: {
             orderBy: {
               ranking_date: "desc",

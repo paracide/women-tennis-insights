@@ -1,18 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { PlayerSearchInput } from "@/components/player-search-input";
-import { format } from "date-fns";
-import { Card, CardBody, CardHeader } from "@heroui/card";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableColumn,
-  TableHeader,
-  TableRow,
-} from "@heroui/table";
-import { PlayerRankingChart } from "@/components/player-ranking-chart";
+import { PlayerSearchInput } from "@/components/players/player-search-input";
+import { PlayerProfileCard } from "@/components/players/player-profile-card";
+import { PlayerRankingSection } from "@/components/players/player-ranking-section";
+import { HeadToHeadSection } from "@/components/players/head-to-head-section";
+import { PlayerStatsComparisonPieCharts } from "@/components/players/player-stats-comparison-pie-charts"; // New import
 
 interface PlayerBasicInfo {
   player_id: number;
@@ -34,6 +27,14 @@ interface PlayerDetails extends PlayerBasicInfo {
   latest_rank: number | null;
   latest_points: number | null;
   latest_rank_date: string | null;
+  ace_avg_last_10_matches: number | null;
+  df_avg_last_10_matches: number | null;
+  first_in_avg_last_10_matches: number | null;
+  first_won_avg_last_10_matches: number | null;
+  svpt_avg_last_10_matches: number | null;
+  bp_faced_avg_last_10_matches: number | null;
+  bp_saved_avg_last_10_matches: number | null;
+  win_rate_last_10_matches: number | null;
 }
 
 interface Match {
@@ -46,6 +47,22 @@ interface Match {
   loser_name: string;
   score: string;
   round: string;
+}
+
+interface HeadToHeadStats {
+  totalMatches: number;
+  p1Wins: number;
+  p2Wins: number;
+  p1WinRate: string;
+  p2WinRate: string;
+  surfaceStats: {
+    surface: string;
+    p1Wins: number;
+    p2Wins: number;
+    p1SurfaceWinRate: string;
+    p2SurfaceWinRate: string;
+    surfaceTotal: number;
+  }[];
 }
 
 export default function PlayerComparisonPage() {
@@ -68,6 +85,7 @@ export default function PlayerComparisonPage() {
   >([]);
   const [loadingRankingHistory, setLoadingRankingHistory] = useState(false);
 
+  // Fetch initial top players
   useEffect(() => {
     const fetchTopPlayers = async () => {
       setLoadingDetails(true);
@@ -105,6 +123,7 @@ export default function PlayerComparisonPage() {
     fetchTopPlayers();
   }, []);
 
+  // Fetch details for player 1
   useEffect(() => {
     const fetchDetails = async (
       playerId: number | null,
@@ -134,6 +153,7 @@ export default function PlayerComparisonPage() {
     fetchDetails(player1?.player_id || null, setPlayer1Details);
   }, [player1]);
 
+  // Fetch details for player 2
   useEffect(() => {
     const fetchDetails = async (
       playerId: number | null,
@@ -163,6 +183,7 @@ export default function PlayerComparisonPage() {
     fetchDetails(player2?.player_id || null, setPlayer2Details);
   }, [player2]);
 
+  // Fetch match history
   useEffect(() => {
     const fetchMatches = async () => {
       if (player1?.player_id && player2?.player_id) {
@@ -191,6 +212,7 @@ export default function PlayerComparisonPage() {
     fetchMatches();
   }, [player1, player2]);
 
+  // Fetch ranking history for player 1
   useEffect(() => {
     const fetchRankingHistory = async (
       playerId: number | null,
@@ -225,6 +247,7 @@ export default function PlayerComparisonPage() {
     fetchRankingHistory(player1?.player_id || null, setPlayer1RankingHistory);
   }, [player1]);
 
+  // Fetch ranking history for player 2
   useEffect(() => {
     const fetchRankingHistory = async (
       playerId: number | null,
@@ -259,64 +282,8 @@ export default function PlayerComparisonPage() {
     fetchRankingHistory(player2?.player_id || null, setPlayer2RankingHistory);
   }, [player2]);
 
-  const calculateAge = (dob: string | null) => {
-    if (!dob) return "N/A";
-    const birthDate = new Date(dob);
-    const today = new Date();
-    let age = today.getFullYear() - birthDate.getFullYear();
-    const m = today.getMonth() - birthDate.getMonth();
-    if (m < 0 || (m === 0 && today.getDate() < birthDate.getDate())) {
-      age--;
-    }
-    return age;
-  };
-
-  const renderPlayerCard = (player: PlayerDetails | null, title: string) => (
-    <Card className="flex-1 min-w-[300px] shadow-lg">
-      <CardHeader>{title}</CardHeader>
-      <CardBody className="p-6">
-        {player ? (
-          <div className="space-y-3 text-sm text-white">
-            <p className="text-lg font-semibold text-white">
-              {player.name_first} {player.name_last} ({player.ioc})
-            </p>
-            <p>
-              <strong>Hand:</strong> {player.hand || "N/A"}
-            </p>
-            <p>
-              <strong>Height:</strong>{" "}
-              {player.height ? `${player.height} cm` : "N/A"}
-            </p>
-            <p>
-              <strong>Date of Birth:</strong>{" "}
-              {player.dob ? format(new Date(player.dob), "PPP") : "N/A"} (
-              {calculateAge(player.dob)} years old)
-            </p>
-            <p>
-              <strong>Latest Rank:</strong>{" "}
-              {player.latest_rank !== null ? player.latest_rank : "N/A"}
-            </p>
-            <p>
-              <strong>Latest Points:</strong>{" "}
-              {player.latest_points !== null ? player.latest_points : "N/A"}
-            </p>
-            <p>
-              <strong>Rank Date:</strong>{" "}
-              {player.latest_rank_date
-                ? format(new Date(player.latest_rank_date), "PPP")
-                : "N/A"}
-            </p>
-          </div>
-        ) : (
-          <p className="text-muted-foreground">
-            Select a player to see details.
-          </p>
-        )}
-      </CardBody>
-    </Card>
-  );
-
-  const calculateHeadToHeadStats = () => {
+  // Calculate head-to-head stats
+  const calculateHeadToHeadStats = (): HeadToHeadStats | null => {
     if (!player1Details || !player2Details || matchHistory.length === 0) {
       return null;
     }
@@ -409,224 +376,50 @@ export default function PlayerComparisonPage() {
           />
         </div>
       </div>
+
       {loadingDetails && (player1 || player2) && (
         <div className="text-center text-lg text-blue-600 mb-8 animate-pulse">
           Loading player details...
         </div>
       )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-        {renderPlayerCard(player1Details, "Player 1 Profile")}
-        {renderPlayerCard(player2Details, "Player 2 Profile")}
+        <PlayerProfileCard player={player1Details} title="Player 1 Profile" />
+        <PlayerProfileCard player={player2Details} title="Player 2 Profile" />
       </div>
+
+      <PlayerStatsComparisonPieCharts
+        player1Details={player1Details}
+        player2Details={player2Details}
+      />
+
       {(player1Details || player2Details) &&
         (player1RankingHistory.length > 0 ||
           player2RankingHistory.length > 0) && (
-          <Card className="mb-10">
-            <CardHeader className="text-white">
-              Historical Ranking Trend
-            </CardHeader>
-            <CardBody className="p-6">
-              {loadingRankingHistory ? (
-                <div className="text-center text-lg text-blue-600 animate-pulse">
-                  Loading ranking history...
-                </div>
-              ) : (
-                <PlayerRankingChart
-                  player1Name={
-                    player1Details
-                      ? `${player1Details.name_first} ${player1Details.name_last}`
-                      : null
-                  }
-                  player1RankingHistory={player1RankingHistory}
-                  player2Name={
-                    player2Details
-                      ? `${player2Details.name_first} ${player2Details.name_last}`
-                      : null
-                  }
-                  player2RankingHistory={player2RankingHistory}
-                />
-              )}
-            </CardBody>
-          </Card>
+          <PlayerRankingSection
+            player1Name={
+              player1Details
+                ? `${player1Details.name_first} ${player1Details.name_last}`
+                : null
+            }
+            player1RankingHistory={player1RankingHistory}
+            player2Name={
+              player2Details
+                ? `${player2Details.name_first} ${player2Details.name_last}`
+                : null
+            }
+            player2RankingHistory={player2RankingHistory}
+            loading={loadingRankingHistory}
+          />
         )}
-      {player1Details && player2Details && (
-        <Card className="shadow-lg">
-          <CardBody className="p-6 flex gap-8">
-            {loadingMatches ? (
-              <div className="text-center text-lg text-blue-600 animate-pulse">
-                Loading match history...
-              </div>
-            ) : matchHistory.length > 0 ? (
-              <>
-                {headToHeadStats && (
-                  <div className="mb-6 p-4">
-                    <h3 className="font-bold text-base mb-2 text-center">
-                      Overall Head-to-Head:
-                    </h3>
-                    <p className="mb-2">
-                      Total Matches:{" "}
-                      <span className="font-semibold">
-                        {headToHeadStats.totalMatches}
-                      </span>
-                    </p>
-                    <div className="grid grid-cols-2 gap-4 mb-4">
-                      <div>
-                        <p className="font-semibold">
-                          {player1Details.name_first} {player1Details.name_last}
-                          :
-                        </p>
-                        <p>
-                          Wins:{" "}
-                          <span className="font-bold text-green-700">
-                            {headToHeadStats.p1Wins}
-                          </span>
-                        </p>
-                        <p>
-                          Win Rate:{" "}
-                          <span className="font-bold">
-                            {headToHeadStats.p1WinRate}%
-                          </span>
-                        </p>
-                      </div>
-                      <div>
-                        <p className="font-semibold">
-                          {player2Details.name_first} {player2Details.name_last}
-                          :
-                        </p>
-                        <p>
-                          Wins:{" "}
-                          <span className="font-bold text-green-700">
-                            {headToHeadStats.p2Wins}
-                          </span>
-                        </p>
-                        <p>
-                          Win Rate:{" "}
-                          <span className="font-bold">
-                            {headToHeadStats.p2WinRate}%
-                          </span>
-                        </p>
-                      </div>
-                    </div>
 
-                    {headToHeadStats.surfaceStats.length > 0 && (
-                      <>
-                        <h3 className="font-bold text-base mb-2 text-center">
-                          Win Rate by Surface:
-                        </h3>
-                        <Table className="w-full text-sm">
-                          <TableHeader>
-                            <TableColumn className="font-semibold">
-                              Surface
-                            </TableColumn>
-                            <TableColumn className="text-center font-semibold">
-                              Matches
-                            </TableColumn>
-                            <TableColumn className="text-center font-semibold">
-                              {player1Details.name_last} Win %
-                            </TableColumn>
-                            <TableColumn className="text-center font-semibold">
-                              {player2Details.name_last} Win %
-                            </TableColumn>
-                          </TableHeader>
-                          <TableBody>
-                            {headToHeadStats.surfaceStats.map((stats, idx) => (
-                              <TableRow key={idx}>
-                                <TableCell className="font-medium">
-                                  {stats.surface}
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  {stats.surfaceTotal}
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  {stats.p1SurfaceWinRate}%
-                                </TableCell>
-                                <TableCell className="text-center">
-                                  {stats.p2SurfaceWinRate}%
-                                </TableCell>
-                              </TableRow>
-                            ))}
-                          </TableBody>
-                        </Table>
-                      </>
-                    )}
-                  </div>
-                )}
-
-                <Table>
-                  <TableHeader>
-                    <TableColumn className="text-gray-600 font-semibold">
-                      Date
-                    </TableColumn>
-                    <TableColumn className="text-gray-600 font-semibold">
-                      Tournament
-                    </TableColumn>
-                    <TableColumn className="text-gray-600 font-semibold">
-                      Level
-                    </TableColumn>
-                    <TableColumn className="text-gray-600 font-semibold">
-                      Surface
-                    </TableColumn>
-                    <TableColumn className="text-gray-600 font-semibold">
-                      Winner
-                    </TableColumn>
-                    <TableColumn className="text-gray-600 font-semibold">
-                      Loser
-                    </TableColumn>
-                    <TableColumn className="text-gray-600 font-semibold">
-                      Score
-                    </TableColumn>
-                    <TableColumn className="text-gray-600 font-semibold">
-                      Round
-                    </TableColumn>
-                  </TableHeader>
-                  <TableBody>
-                    {matchHistory.map((match, index) => (
-                      <TableRow key={index}>
-                        <TableCell>
-                          {format(new Date(match.tourney_date), "PPP")}
-                        </TableCell>
-                        <TableCell>{match.tourney_name}</TableCell>
-                        <TableCell>{match.tourney_level}</TableCell>
-                        <TableCell>{match.surface}</TableCell>
-                        <TableCell
-                          className={
-                            match.winner_name ===
-                              `${player1Details.name_first} ${player1Details.name_last}` ||
-                            match.winner_name ===
-                              `${player2Details.name_first} ${player2Details.name_last}`
-                              ? "font-semibold text-green-700"
-                              : ""
-                          }
-                        >
-                          {match.winner_name}
-                        </TableCell>
-                        <TableCell
-                          className={
-                            match.loser_name ===
-                              `${player1Details.name_first} ${player1Details.name_last}` ||
-                            match.loser_name ===
-                              `${player2Details.name_first} ${player2Details.name_last}`
-                              ? "font-semibold text-red-700"
-                              : ""
-                          }
-                        >
-                          {match.loser_name}
-                        </TableCell>
-                        <TableCell>{match.score}</TableCell>
-                        <TableCell>{match.round}</TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </>
-            ) : (
-              <p className="text-center text-muted-foreground py-4">
-                No head-to-head matches found between these players.
-              </p>
-            )}
-          </CardBody>
-        </Card>
-      )}
+      <HeadToHeadSection
+        player1Details={player1Details}
+        player2Details={player2Details}
+        matchHistory={matchHistory}
+        loading={loadingMatches}
+        headToHeadStats={headToHeadStats} // Pass the calculated stats
+      />
     </div>
   );
 }
