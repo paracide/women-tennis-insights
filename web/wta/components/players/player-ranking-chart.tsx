@@ -1,5 +1,4 @@
 "use client";
-
 import ReactECharts from "echarts-for-react";
 
 interface RankingData {
@@ -51,7 +50,6 @@ export function PlayerRankingChart({
     // 为每个球员生成 dataset + series
     const datasetWithFilters: any[] = [];
     const seriesList: any[] = [];
-
     players.forEach((player) => {
       const datasetId = "dataset_" + player;
       datasetWithFilters.push({
@@ -68,12 +66,14 @@ export function PlayerRankingChart({
         type: "line",
         datasetId,
         showSymbol: false,
-        name: player,
+        name: player, // ECharts legend uses this name
         endLabel: {
           show: true,
           formatter: (params: any) => {
+            // 保持 endLabel 显示球员名称和最终排名
             return `${params.value[1]}: Rank ${params.value[2] ?? "N/A"}`;
           },
+          color: "#fff", // Ensure end label is visible
         },
         labelLayout: {
           moveOverlap: "shiftY",
@@ -116,6 +116,14 @@ export function PlayerRankingChart({
       xAxis: {
         type: "category",
         boundaryGap: false,
+        axisLabel: {
+          color: "#fff", // Ensure x-axis labels are visible
+        },
+        axisLine: {
+          lineStyle: {
+            color: "#fff", // Ensure x-axis line is visible
+          },
+        },
       },
       yAxis: {
         type: "value",
@@ -123,9 +131,29 @@ export function PlayerRankingChart({
         inverse: true, // 排名越小越高
         min: 0,
         max: 100,
+        axisLabel: {
+          color: "#fff", // Ensure y-axis labels are visible
+        },
+        axisLine: {
+          lineStyle: {
+            color: "#fff", // Ensure y-axis line is visible
+          },
+        },
+        nameTextStyle: {
+          color: "#fff", // Ensure y-axis name is visible
+        },
       },
       grid: {
         right: 120,
+      },
+      // 新增的 legend 配置
+      legend: {
+        data: players, // 使用球员名称作为图例项
+        textStyle: {
+          color: "#fff", // 图例文字颜色
+        },
+        top: "bottom", // 将图例放在底部，避免遮挡图表
+        left: "center",
       },
       series: seriesList,
     };
