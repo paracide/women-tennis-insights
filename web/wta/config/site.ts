@@ -14,10 +14,6 @@ export const siteConfig = {
       href: "/ranking",
     },
     {
-      label: "BI",
-      href: "/bi",
-    },
-    {
       label: "Players",
       href: "/players",
     },
