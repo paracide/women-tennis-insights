@@ -1,7 +1,6 @@
 "use client";
 
 import ReactECharts from "echarts-for-react";
-import { format } from "date-fns";
 
 interface RankingData {
   ranking_date: string | null;
@@ -23,6 +22,7 @@ export function PlayerRankingChart({
   player2RankingHistory,
 }: PlayerRankingChartProps) {
   const getOption = () => {
+    // 所有日期去重并排序
     const dates = Array.from(
       new Set([
         ...player1RankingHistory.map((d) => d.ranking_date),
@@ -30,96 +30,104 @@ export function PlayerRankingChart({
       ]),
     )
       .filter(Boolean)
-      .sort() as string[]; // Get all unique dates and sort them
+      .sort() as string[];
 
-    const player1Ranks = dates.map((date) => {
-      const data = player1RankingHistory.find((d) => d.ranking_date === date);
-      return data ? data.rank : null;
+    // dataset_raw 数据格式：[ranking_date, player, rank]
+    const rawData: (string | number | null)[][] = [];
+    dates.forEach((date) => {
+      if (player1Name) {
+        const p1 = player1RankingHistory.find((d) => d.ranking_date === date);
+        rawData.push([date, player1Name, p1?.rank ?? null]);
+      }
+      if (player2Name) {
+        const p2 = player2RankingHistory.find((d) => d.ranking_date === date);
+        rawData.push([date, player2Name, p2?.rank ?? null]);
+      }
     });
 
-    const player2Ranks = dates.map((date) => {
-      const data = player2RankingHistory.find((d) => d.ranking_date === date);
-      return data ? data.rank : null;
-    });
+    // 所有球员
+    const players = [player1Name, player2Name].filter(Boolean) as string[];
 
-    // Determine min/max rank for Y-axis
-    const allRanks = [...player1Ranks, ...player2Ranks].filter(
-      (rank) => rank !== null,
-    ) as number[];
-    const minRank = allRanks.length > 0 ? Math.min(...allRanks) : 1;
-    const maxRank = allRanks.length > 0 ? Math.max(...allRanks) : 100;
+    // 为每个球员生成 dataset + series
+    const datasetWithFilters: any[] = [];
+    const seriesList: any[] = [];
+
+    players.forEach((player) => {
+      const datasetId = "dataset_" + player;
+      datasetWithFilters.push({
+        id: datasetId,
+        fromDatasetId: "dataset_raw",
+        transform: {
+          type: "filter",
+          config: {
+            and: [{ dimension: "player", "=": player }],
+          },
+        },
+      });
+      seriesList.push({
+        type: "line",
+        datasetId,
+        showSymbol: false,
+        name: player,
+        endLabel: {
+          show: true,
+          formatter: (params: any) => {
+            return `${params.value[1]}: Rank ${params.value[2] ?? "N/A"}`;
+          },
+        },
+        labelLayout: {
+          moveOverlap: "shiftY",
+        },
+        emphasis: {
+          focus: "series",
+        },
+        encode: {
+          x: "ranking_date",
+          y: "rank",
+          label: ["player", "rank"],
+          itemName: "ranking_date",
+          tooltip: ["rank"],
+        },
+      });
+    });
 
     return {
+      animationDuration: 8000, // 动画总时长
+      animationEasing: "linear",
+      dataset: [
+        {
+          id: "dataset_raw",
+          source: [["ranking_date", "player", "rank"], ...rawData],
+        },
+        ...datasetWithFilters,
+      ],
       tooltip: {
+        order: "valueAsc",
         trigger: "axis",
-        formatter: function (params: any) {
+        formatter: (params: any) => {
           let res = `Date: ${params[0].name}<br/>`;
           params.forEach((item: any) => {
             res += `<span style="display:inline-block;margin-right:4px;border-radius:10px;width:10px;height:10px;background-color:${item.color};"></span>`;
-            res += `${item.seriesName}: Rank ${item.value !== null ? item.value : "N/A"}<br/>`;
+            res += `${item.seriesName}: Rank ${item.value[2] ?? "N/A"}<br/>`;
           });
           return res;
         },
       },
-      legend: {
-        data: [player1Name, player2Name].filter(Boolean),
-        bottom: 10,
-        textStyle: {
-          color: "#555",
-        },
-      },
-      grid: {
-        left: "3%",
-        right: "4%",
-        bottom: "15%",
-        containLabel: true,
-      },
       xAxis: {
         type: "category",
         boundaryGap: false,
-        data: dates,
-        axisLabel: {
-          interval: Math.ceil(dates.length / 10), // Show fewer labels if too many dates
-          formatter: function (value: string) {
-            return format(new Date(value), "yyyy"); // Format date for display
-          },
-        },
       },
       yAxis: {
         type: "value",
         name: "Rank",
-        inverse: true, // Lower rank is better, so invert the axis
-        min: 0, // Changed: Start from 0 to give space above rank 1
+        inverse: true, // 排名越小越高
+        min: 0,
         max: 100,
-        axisLabel: {
-          formatter: "Rank {value}",
-        },
-        splitNumber: 5, // Ensure enough split lines
       },
-      series: [
-        {
-          name: player1Name,
-          type: "line",
-          data: player1Ranks,
-          emphasis: {
-            focus: "series",
-          },
-          itemStyle: {
-            color: "#4CAF50", // Green for player 1
-          },
-        },
-        {
-          name: player2Name,
-          type: "line",
-          data: player2Ranks,
-          emphasis: {
-            focus: "series",
-          },
-          itemStyle: {
-            color: "#2196F3", // Blue for player 2
-          },
-        },
-      ].filter((s) => s.name !== null), // Filter out series if player is not selected
+      grid: {
+        right: 120,
+      },
+      series: seriesList,
     };
   };
 
@@ -132,7 +140,7 @@ export function PlayerRankingChart({
   }
 
   return (
-    <div className="w-full h-[450px]">
+    <div className="w-full h-[500px]">
       <ReactECharts
         option={getOption()}
         style={{ height: "100%", width: "100%" }}

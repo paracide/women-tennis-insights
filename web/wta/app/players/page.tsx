@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { PlayerSearchInput } from "@/components/players/player-search-input";
-import { HeadToHeadSection } from "@/components/players/head-to-head-section";
-import { PlayerRankingSection } from "@/components/players/player-ranking-section";
 import { PlayerProfileCard } from "@/components/players/player-profile-card";
+import { PlayerRankingSection } from "@/components/players/player-ranking-section";
+import { HeadToHeadSection } from "@/components/players/head-to-head-section";
+import { PlayerStatsComparisonPieCharts } from "@/components/players/player-stats-comparison-pie-charts"; // New import
 
 interface PlayerBasicInfo {
   player_id: number;
@@ -46,6 +47,22 @@ interface Match {
   loser_name: string;
   score: string;
   round: string;
+}
+
+interface HeadToHeadStats {
+  totalMatches: number;
+  p1Wins: number;
+  p2Wins: number;
+  p1WinRate: string;
+  p2WinRate: string;
+  surfaceStats: {
+    surface: string;
+    p1Wins: number;
+    p2Wins: number;
+    p1SurfaceWinRate: string;
+    p2SurfaceWinRate: string;
+    surfaceTotal: number;
+  }[];
 }
 
 export default function PlayerComparisonPage() {
@@ -265,6 +282,77 @@ export default function PlayerComparisonPage() {
     fetchRankingHistory(player2?.player_id || null, setPlayer2RankingHistory);
   }, [player2]);
 
+  // Calculate head-to-head stats
+  const calculateHeadToHeadStats = (): HeadToHeadStats | null => {
+    if (!player1Details || !player2Details || matchHistory.length === 0) {
+      return null;
+    }
+
+    const p1FullName = `${player1Details.name_first} ${player1Details.name_last}`;
+    const p2FullName = `${player2Details.name_first} ${player2Details.name_last}`;
+
+    let p1Wins = 0;
+    let p2Wins = 0;
+    const surfaceStats: {
+      [key: string]: { p1Wins: number; p2Wins: number; total: number };
+    } = {};
+
+    matchHistory.forEach((match) => {
+      const surface = match.surface || "Unknown";
+      if (!surfaceStats[surface]) {
+        surfaceStats[surface] = { p1Wins: 0, p2Wins: 0, total: 0 };
+      }
+      surfaceStats[surface].total++;
+
+      if (match.winner_name === p1FullName) {
+        p1Wins++;
+        surfaceStats[surface].p1Wins++;
+      } else if (match.winner_name === p2FullName) {
+        p2Wins++;
+        surfaceStats[surface].p2Wins++;
+      }
+    });
+
+    const totalMatches = p1Wins + p2Wins;
+    const p1WinRate =
+      totalMatches > 0 ? ((p1Wins / totalMatches) * 100).toFixed(1) : "N/A";
+    const p2WinRate =
+      totalMatches > 0 ? ((p2Wins / totalMatches) * 100).toFixed(1) : "N/A";
+
+    const formattedSurfaceStats = Object.entries(surfaceStats).map(
+      ([surface, stats]) => {
+        const surfaceTotal = stats.p1Wins + stats.p2Wins;
+        const p1SurfaceWinRate =
+          surfaceTotal > 0
+            ? ((stats.p1Wins / surfaceTotal) * 100).toFixed(1)
+            : "N/A";
+        const p2SurfaceWinRate =
+          surfaceTotal > 0
+            ? ((stats.p2Wins / surfaceTotal) * 100).toFixed(1)
+            : "N/A";
+        return {
+          surface,
+          p1Wins: stats.p1Wins,
+          p2Wins: stats.p2Wins,
+          p1SurfaceWinRate,
+          p2SurfaceWinRate,
+          surfaceTotal,
+        };
+      },
+    );
+
+    return {
+      totalMatches,
+      p1Wins,
+      p2Wins,
+      p1WinRate,
+      p2WinRate,
+      surfaceStats: formattedSurfaceStats,
+    };
+  };
+
+  const headToHeadStats = calculateHeadToHeadStats();
+
   return (
     <div className="container mx-auto p-4 md:p-8 min-h-screen font-sans text-white">
       <h1 className="text-4xl font-extrabold mb-10 text-center text-white">
@@ -300,6 +388,11 @@ export default function PlayerComparisonPage() {
         <PlayerProfileCard player={player2Details} title="Player 2 Profile" />
       </div>
 
+      <PlayerStatsComparisonPieCharts
+        player1Details={player1Details}
+        player2Details={player2Details}
+      />
+
       {(player1Details || player2Details) &&
         (player1RankingHistory.length > 0 ||
           player2RankingHistory.length > 0) && (
@@ -325,6 +418,7 @@ export default function PlayerComparisonPage() {
         player2Details={player2Details}
         matchHistory={matchHistory}
         loading={loadingMatches}
+        headToHeadStats={headToHeadStats} // Pass the calculated stats
       />
     </div>
   );
