@@ -76,6 +76,9 @@
 > \| `*_bpSaved`    | Break points saved |
 > \| `*_bpFaced`    | Break points faced |
 
+l_SvGms = loser's service games
+w_SvGms = winner's service games
+
 ---
 
 tourney_level（比赛级别）字段通常用单个字母来表示比赛的级别
