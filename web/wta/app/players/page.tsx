@@ -31,9 +31,19 @@ interface PlayerDetails extends PlayerBasicInfo {
   hand: string;
   dob: string;
   height: number;
+
   latest_rank: number | null;
   latest_points: number | null;
   latest_rank_date: string | null;
+
+  ace_avg_last_10_matches: number | null;
+  df_avg_last_10_matches: number | null;
+  first_in_avg_last_10_matches: number | null;
+  first_won_avg_last_10_matches: number | null;
+  svpt_avg_last_10_matches: number | null;
+  bp_faced_avg_last_10_matches: number | null;
+  bp_saved_avg_last_10_matches: number | null;
+  win_rate_last_10_matches: number | null;
 }
 
 interface Match {
@@ -304,6 +314,61 @@ export default function PlayerComparisonPage() {
               <strong>Rank Date:</strong>{" "}
               {player.latest_rank_date
                 ? format(new Date(player.latest_rank_date), "PPP")
+                : "N/A"}
+            </p>
+            <p>
+              <strong>Ace Avg Last 10 Matches:</strong>{" "}
+              {player.ace_avg_last_10_matches !== null
+                ? player.ace_avg_last_10_matches
+                : "N/A"}
+            </p>
+
+            <p>
+              <strong>DF Avg Last 10 Matches:</strong>{" "}
+              {player.df_avg_last_10_matches !== null
+                ? player.df_avg_last_10_matches
+                : "N/A"}
+            </p>
+
+            <p>
+              <strong>First In Avg Last 10 Matches:</strong>{" "}
+              {player.first_in_avg_last_10_matches !== null
+                ? player.first_in_avg_last_10_matches
+                : "N/A"}
+            </p>
+
+            <p>
+              <strong>First Won Avg Last 10 Matches:</strong>{" "}
+              {player.first_won_avg_last_10_matches !== null
+                ? player.first_won_avg_last_10_matches
+                : "N/A"}
+            </p>
+
+            <p>
+              <strong>SVPT Avg Last 10 Matches:</strong>{" "}
+              {player.svpt_avg_last_10_matches !== null
+                ? player.svpt_avg_last_10_matches
+                : "N/A"}
+            </p>
+
+            <p>
+              <strong>BP Faced Avg Last 10 Matches:</strong>{" "}
+              {player.bp_faced_avg_last_10_matches !== null
+                ? player.bp_faced_avg_last_10_matches
+                : "N/A"}
+            </p>
+
+            <p>
+              <strong>BP Saved Avg Last 10 Matches:</strong>{" "}
+              {player.bp_saved_avg_last_10_matches !== null
+                ? player.bp_saved_avg_last_10_matches
+                : "N/A"}
+            </p>
+
+            <p>
+              <strong>Win Rate Last 10 Matches:</strong>{" "}
+              {player.win_rate_last_10_matches !== null
+                ? player.win_rate_last_10_matches
                 : "N/A"}
             </p>
           </div>
