@@ -18,8 +18,8 @@ interface PlayerDetails {
 }
 
 interface PlayerStatsComparisonPieChartsProps {
-  player1Details: PlayerDetails | null;
-  player2Details: PlayerDetails | null;
+  player1Details: PlayerDetails | undefined;
+  player2Details: PlayerDetails | undefined;
 }
 
 export function PlayerStatsComparisonPieCharts({

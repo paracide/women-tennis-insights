@@ -10,12 +10,11 @@ import { fetchData } from "@/utils/api";
 
 // Hook：获取玩家详情
 function usePlayerDetails(playerId: number | null) {
-  const [details, setDetails] = useState<PlayerDetails | null>(null);
+  const [details, setDetails] = useState<PlayerDetails | undefined>();
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!playerId) {
-      setDetails(null);
       return;
     }
     setLoading(true);
@@ -54,6 +53,7 @@ function useRankingHistory(playerId: number | null) {
 function useMatchHistory(player1Id: number | null, player2Id: number | null) {
   const [matches, setMatches] = useState<Match[]>([]);
   const [loading, setLoading] = useState(false);
+  const [prediction, setPrediction] = useState<EloPrediction>();
 
   useEffect(() => {
     if (!player1Id || !player2Id) {
@@ -67,9 +67,14 @@ function useMatchHistory(player1Id: number | null, player2Id: number | null) {
       setMatches(data ?? []);
       setLoading(false);
     });
+    fetchData<EloPrediction>(
+      `/api/wta/player_elo?player1_id=${player1Id}&player2_id=${player2Id}`,
+    ).then((data) => {
+      setPrediction(data);
+    });
   }, [player1Id, player2Id]);
 
-  return { matches, loading };
+  return { matches, loading, prediction };
 }
 
 export default function PlayerComparisonPage() {
@@ -112,10 +117,11 @@ export default function PlayerComparisonPage() {
   const { history: player2RankingHistory, loading: loadingRank2 } =
     useRankingHistory(player2?.player_id ?? null);
 
-  const { matches: matchHistory, loading: loadingMatches } = useMatchHistory(
-    player1?.player_id ?? null,
-    player2?.player_id ?? null,
-  );
+  const {
+    matches: matchHistory,
+    loading: loadingMatches,
+    prediction,
+  } = useMatchHistory(player1?.player_id ?? null, player2?.player_id ?? null);
 
   // 计算 head-to-head
   const calculateHeadToHeadStats = (): HeadToHeadStats | null => {
@@ -245,6 +251,7 @@ export default function PlayerComparisonPage() {
         player1Details={player1Details}
         player2Details={player2Details}
         matchHistory={matchHistory}
+        prediction={prediction}
         loading={loadingMatches}
         headToHeadStats={headToHeadStats}
       />

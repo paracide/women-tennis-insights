@@ -23,7 +23,7 @@ interface PlayerDetails {
 }
 
 interface PlayerProfileCardProps {
-  player: PlayerDetails | null;
+  player: PlayerDetails | undefined;
   title: string;
 }
 

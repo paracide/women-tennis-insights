@@ -55,3 +55,10 @@ interface HeadToHeadStats {
     surfaceTotal: number;
   }[];
 }
+
+interface EloPrediction {
+  elo_win_rate: number;
+  elo_win_rate_grass: number;
+  elo_win_rate_clay: number;
+  elo_win_rate_hard: number;
+}
