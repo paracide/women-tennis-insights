@@ -7,6 +7,8 @@ import { PlayerRankingSection } from "@/components/players/player-ranking-sectio
 import { HeadToHeadSection } from "@/components/players/head-to-head-section";
 import { PlayerStatsComparisonPieCharts } from "@/components/players/player-stats-comparison-pie-charts";
 import { fetchData } from "@/utils/api";
+import { Card, CardBody } from "@heroui/card";
+import { EloPredictionCard } from "@/components/players/head-to-head/EloPredictionCard";
 
 // Hook：获取玩家详情
 function usePlayerDetails(playerId: number | null) {
@@ -218,6 +220,20 @@ export default function PlayerComparisonPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
         <PlayerProfileCard player={player1Details} title="Player 1 Profile" />
         <PlayerProfileCard player={player2Details} title="Player 2 Profile" />
+      </div>
+
+      <div className="py-8">
+        <Card className="shadow-lg w-full">
+          <CardBody className="p-6 flex flex-col gap-8">
+            {prediction && player1Details && player2Details && (
+              <EloPredictionCard
+                prediction={prediction}
+                player1Name={player1Details.name_last}
+                player2Name={player2Details.name_last}
+              />
+            )}
+          </CardBody>
+        </Card>
       </div>
 
       {/* Stats */}

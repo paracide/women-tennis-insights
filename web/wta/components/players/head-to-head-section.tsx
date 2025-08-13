@@ -1,5 +1,4 @@
 import { Card, CardBody } from "@heroui/card";
-import { EloPredictionCard } from "@/components/players/head-to-head/EloPredictionCard";
 import { OverallStatsCard } from "@/components/players/head-to-head/OverallStatsCard";
 import { MatchHistoryTable } from "@/components/players/head-to-head/MatchHistoryTable";
 
@@ -26,40 +25,42 @@ export function HeadToHeadSection({
   const player2Name = `${player2Details.name_first} ${player2Details.name_last}`;
 
   return (
-    <Card className="shadow-lg">
-      <CardBody className="p-6 flex flex-col gap-8">
-        {loading && (
-          <div className="text-center text-lg text-blue-600 animate-pulse">
-            Loading match history...
-          </div>
-        )}
+    <div className="container flex flex-col items-center gap-8">
+      <Card className="shadow-lg w-full">
+        <CardBody className="p-6 flex flex-col gap-8">
+          {!loading && headToHeadStats && (
+            <OverallStatsCard
+              headToHeadStats={headToHeadStats}
+              player1Name={player1Name}
+              player2Name={player2Name}
+            />
+          )}
+        </CardBody>
+      </Card>
 
-        {!loading && prediction && (
-          <EloPredictionCard prediction={prediction} />
-        )}
+      <Card className="shadow-lg w-full">
+        <CardBody className="p-6 flex flex-col gap-8">
+          {loading && (
+            <div className="text-center text-lg text-blue-600 animate-pulse">
+              Loading match history...
+            </div>
+          )}
 
-        {!loading && headToHeadStats && (
-          <OverallStatsCard
-            headToHeadStats={headToHeadStats}
-            player1Name={player1Name}
-            player2Name={player2Name}
-          />
-        )}
+          {!loading && matchHistory.length > 0 && (
+            <MatchHistoryTable
+              matchHistory={matchHistory}
+              player1Name={player1Name}
+              player2Name={player2Name}
+            />
+          )}
 
-        {!loading && matchHistory.length > 0 && (
-          <MatchHistoryTable
-            matchHistory={matchHistory}
-            player1Name={player1Name}
-            player2Name={player2Name}
-          />
-        )}
-
-        {!loading && matchHistory.length === 0 && (
-          <p className="text-center text-muted-foreground py-4">
-            No head-to-head matches found between these players.
-          </p>
-        )}
-      </CardBody>
-    </Card>
+          {!loading && matchHistory.length === 0 && (
+            <p className="text-center text-muted-foreground py-4">
+              No head-to-head matches found between these players.
+            </p>
+          )}
+        </CardBody>
+      </Card>
+    </div>
   );
 }
