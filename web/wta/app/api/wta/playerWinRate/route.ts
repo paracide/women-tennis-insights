@@ -3,10 +3,6 @@ import prisma from "@/lib/prisma";
 
 export async function GET() {
   const matches = await prisma.wta.findMany({
-    where: {
-      winner_name: { not: null },
-      loser_name: { not: null },
-    },
     select: {
       winner_name: true,
       loser_name: true,
@@ -43,7 +39,7 @@ export async function GET() {
       };
     })
     .filter((player) => player.totalMatches >= 20)
-    .sort((a, b) => b.winRate - a.winRate) 
+    .sort((a, b) => b.winRate - a.winRate)
     .slice(0, 15);
 
   return NextResponse.json(playerWinRates);

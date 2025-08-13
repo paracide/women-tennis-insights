@@ -6,102 +6,87 @@ import { PlayerProfileCard } from "@/components/players/player-profile-card";
 import { PlayerRankingSection } from "@/components/players/player-ranking-section";
 import { HeadToHeadSection } from "@/components/players/head-to-head-section";
 import { PlayerStatsComparisonPieCharts } from "@/components/players/player-stats-comparison-pie-charts";
+import { fetchData } from "@/utils/api";
 
-interface PlayerBasicInfo {
-  player_id: number;
-  name_first: string;
-  name_last: string;
-  ioc: string;
+// Hook：获取玩家详情
+function usePlayerDetails(playerId: number | null) {
+  const [details, setDetails] = useState<PlayerDetails | null>(null);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!playerId) {
+      setDetails(null);
+      return;
+    }
+    setLoading(true);
+    fetchData<PlayerDetails>(`/api/wta/player?id=${playerId}`).then((data) => {
+      setDetails(data);
+      setLoading(false);
+    });
+  }, [playerId]);
+
+  return { details, loading };
 }
 
-interface RankingData {
-  ranking_date: string | null;
-  rank: number | null;
-  points: number | null;
+// Hook：获取玩家排名历史
+function useRankingHistory(playerId: number | null) {
+  const [history, setHistory] = useState<RankingData[]>([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!playerId) {
+      setHistory([]);
+      return;
+    }
+    setLoading(true);
+    fetchData<RankingData[]>(
+      `/api/wta/player?historyPlayerId=${playerId}`,
+    ).then((data) => {
+      setHistory(data ?? []);
+      setLoading(false);
+    });
+  }, [playerId]);
+
+  return { history, loading };
 }
 
-interface PlayerDetails extends PlayerBasicInfo {
-  hand: string;
-  dob: string;
-  height: number;
-  latest_rank: number | null;
-  latest_points: number | null;
-  latest_rank_date: string | null;
-  ace_avg_last_10_matches: number | null;
-  df_avg_last_10_matches: number | null;
-  first_in_avg_last_10_matches: number | null;
-  first_won_avg_last_10_matches: number | null;
-  svpt_avg_last_10_matches: number | null;
-  bp_faced_avg_last_10_matches: number | null;
-  bp_saved_avg_last_10_matches: number | null;
-  win_rate_last_10_matches: number | null;
-}
+// Hook：获取双方比赛记录
+function useMatchHistory(player1Id: number | null, player2Id: number | null) {
+  const [matches, setMatches] = useState<Match[]>([]);
+  const [loading, setLoading] = useState(false);
 
-interface Match {
-  tourney_id: string;
-  tourney_name: string;
-  surface: string;
-  tourney_level: string;
-  tourney_date: string;
-  winner_name: string;
-  loser_name: string;
-  score: string;
-  round: string;
-}
+  useEffect(() => {
+    if (!player1Id || !player2Id) {
+      setMatches([]);
+      return;
+    }
+    setLoading(true);
+    fetchData<Match[]>(
+      `/api/wta/player?player1Id=${player1Id}&player2Id=${player2Id}`,
+    ).then((data) => {
+      setMatches(data ?? []);
+      setLoading(false);
+    });
+  }, [player1Id, player2Id]);
 
-interface HeadToHeadStats {
-  totalMatches: number;
-  p1Wins: number;
-  p2Wins: number;
-  p1WinRate: string;
-  p2WinRate: string;
-  surfaceStats: {
-    surface: string;
-    p1Wins: number;
-    p2Wins: number;
-    p1SurfaceWinRate: string;
-    p2SurfaceWinRate: string;
-    surfaceTotal: number;
-  }[];
+  return { matches, loading };
 }
 
 export default function PlayerComparisonPage() {
   const [player1, setPlayer1] = useState<PlayerBasicInfo | null>(null);
   const [player2, setPlayer2] = useState<PlayerBasicInfo | null>(null);
-  const [player1Details, setPlayer1Details] = useState<PlayerDetails | null>(
-    null,
-  );
-  const [player2Details, setPlayer2Details] = useState<PlayerDetails | null>(
-    null,
-  );
-  const [loadingDetails, setLoadingDetails] = useState(false);
-  const [matchHistory, setMatchHistory] = useState<Match[]>([]);
-  const [loadingMatches, setLoadingMatches] = useState(false);
-  const [player1RankingHistory, setPlayer1RankingHistory] = useState<
-    RankingData[]
-  >([]);
-  const [player2RankingHistory, setPlayer2RankingHistory] = useState<
-    RankingData[]
-  >([]);
-  const [loadingRankingHistory, setLoadingRankingHistory] = useState(false);
 
-  // Fetch initial top players
+  // 初始化 top players
   useEffect(() => {
-    const fetchTopPlayers = async () => {
-      setLoadingDetails(true);
-      try {
-        const res = await fetch(`/api/wta/player?topPlayers=true`);
-        if (res.ok) {
-          const data: PlayerDetails[] = await res.json();
-          if (data.length >= 1) {
-            setPlayer1({
-              player_id: data[0].player_id,
-              name_first: data[0].name_first,
-              name_last: data[0].name_last,
-              ioc: data[0].ioc,
-            });
-            setPlayer1Details(data[0]);
-          }
+    fetchData<PlayerDetails[]>(`/api/wta/player?topPlayers=true`).then(
+      (data) => {
+        if (data && data.length) {
+          setPlayer1({
+            player_id: data[0].player_id,
+            name_first: data[0].name_first,
+            name_last: data[0].name_last,
+            ioc: data[0].ioc,
+          });
           if (data.length >= 2) {
             setPlayer2({
               player_id: data[1].player_id,
@@ -109,199 +94,47 @@ export default function PlayerComparisonPage() {
               name_last: data[1].name_last,
               ioc: data[1].ioc,
             });
-            setPlayer2Details(data[1]);
           }
-        } else {
-          console.error("Failed to fetch top players");
         }
-      } catch (error) {
-        console.error("Error fetching top players:", error);
-      } finally {
-        setLoadingDetails(false);
-      }
-    };
-    fetchTopPlayers();
+      },
+    );
   }, []);
 
-  // Fetch details for player 1
-  useEffect(() => {
-    const fetchDetails = async (
-      playerId: number | null,
-      setDetails: (details: PlayerDetails | null) => void,
-    ) => {
-      if (!playerId) {
-        setDetails(null);
-        return;
-      }
-      setLoadingDetails(true);
-      try {
-        const res = await fetch(`/api/wta/player?id=${playerId}`);
-        if (res.ok) {
-          const data: PlayerDetails = await res.json();
-          setDetails(data);
-        } else {
-          console.error(`Failed to fetch details for player ${playerId}`);
-          setDetails(null);
-        }
-      } catch (error) {
-        console.error(`Error fetching details for player ${playerId}:`, error);
-        setDetails(null);
-      } finally {
-        setLoadingDetails(false);
-      }
-    };
-    fetchDetails(player1?.player_id || null, setPlayer1Details);
-  }, [player1]);
+  const { details: player1Details, loading: loadingP1 } = usePlayerDetails(
+    player1?.player_id ?? null,
+  );
+  const { details: player2Details, loading: loadingP2 } = usePlayerDetails(
+    player2?.player_id ?? null,
+  );
 
-  // Fetch details for player 2
-  useEffect(() => {
-    const fetchDetails = async (
-      playerId: number | null,
-      setDetails: (details: PlayerDetails | null) => void,
-    ) => {
-      if (!playerId) {
-        setDetails(null);
-        return;
-      }
-      setLoadingDetails(true);
-      try {
-        const res = await fetch(`/api/wta/player?id=${playerId}`);
-        if (res.ok) {
-          const data: PlayerDetails = await res.json();
-          setDetails(data);
-        } else {
-          console.error(`Failed to fetch details for player ${playerId}`);
-          setDetails(null);
-        }
-      } catch (error) {
-        console.error(`Error fetching details for player ${playerId}:`, error);
-        setDetails(null);
-      } finally {
-        setLoadingDetails(false);
-      }
-    };
-    fetchDetails(player2?.player_id || null, setPlayer2Details);
-  }, [player2]);
+  const { history: player1RankingHistory, loading: loadingRank1 } =
+    useRankingHistory(player1?.player_id ?? null);
+  const { history: player2RankingHistory, loading: loadingRank2 } =
+    useRankingHistory(player2?.player_id ?? null);
 
-  // Fetch match history
-  useEffect(() => {
-    const fetchMatches = async () => {
-      if (player1?.player_id && player2?.player_id) {
-        setLoadingMatches(true);
-        try {
-          const res = await fetch(
-            `/api/wta/player?player1Id=${player1.player_id}&player2Id=${player2.player_id}`,
-          );
-          if (res.ok) {
-            const data: Match[] = await res.json();
-            setMatchHistory(data);
-          } else {
-            console.error("Failed to fetch match history");
-            setMatchHistory([]);
-          }
-        } catch (error) {
-          console.error("Error fetching match history:", error);
-          setMatchHistory([]);
-        } finally {
-          setLoadingMatches(false);
-        }
-      } else {
-        setMatchHistory([]);
-      }
-    };
-    fetchMatches();
-  }, [player1, player2]);
+  const { matches: matchHistory, loading: loadingMatches } = useMatchHistory(
+    player1?.player_id ?? null,
+    player2?.player_id ?? null,
+  );
 
-  // Fetch ranking history for player 1
-  useEffect(() => {
-    const fetchRankingHistory = async (
-      playerId: number | null,
-      setHistory: (history: RankingData[]) => void,
-    ) => {
-      if (!playerId) {
-        setHistory([]);
-        return;
-      }
-      setLoadingRankingHistory(true);
-      try {
-        const res = await fetch(`/api/wta/player?historyPlayerId=${playerId}`);
-        if (res.ok) {
-          const data: RankingData[] = await res.json();
-          setHistory(data);
-        } else {
-          console.error(
-            `Failed to fetch ranking history for player ${playerId}`,
-          );
-          setHistory([]);
-        }
-      } catch (error) {
-        console.error(
-          `Error fetching ranking history for player ${playerId}:`,
-          error,
-        );
-        setHistory([]);
-      } finally {
-        setLoadingRankingHistory(false);
-      }
-    };
-    fetchRankingHistory(player1?.player_id || null, setPlayer1RankingHistory);
-  }, [player1]);
-
-  // Fetch ranking history for player 2
-  useEffect(() => {
-    const fetchRankingHistory = async (
-      playerId: number | null,
-      setHistory: (history: RankingData[]) => void,
-    ) => {
-      if (!playerId) {
-        setHistory([]);
-        return;
-      }
-      setLoadingRankingHistory(true);
-      try {
-        const res = await fetch(`/api/wta/player?historyPlayerId=${playerId}`);
-        if (res.ok) {
-          const data: RankingData[] = await res.json();
-          setHistory(data);
-        } else {
-          console.error(
-            `Failed to fetch ranking history for player ${playerId}`,
-          );
-          setHistory([]);
-        }
-      } catch (error) {
-        console.error(
-          `Error fetching ranking history for player ${playerId}:`,
-          error,
-        );
-        setHistory([]);
-      } finally {
-        setLoadingRankingHistory(false);
-      }
-    };
-    fetchRankingHistory(player2?.player_id || null, setPlayer2RankingHistory);
-  }, [player2]);
-
-  // Calculate head-to-head stats
+  // 计算 head-to-head
   const calculateHeadToHeadStats = (): HeadToHeadStats | null => {
-    if (!player1Details || !player2Details || matchHistory.length === 0) {
+    if (!player1Details || !player2Details || matchHistory.length === 0)
       return null;
-    }
 
     const p1FullName = `${player1Details.name_first} ${player1Details.name_last}`;
     const p2FullName = `${player2Details.name_first} ${player2Details.name_last}`;
 
-    let p1Wins = 0;
-    let p2Wins = 0;
-    const surfaceStats: {
-      [key: string]: { p1Wins: number; p2Wins: number; total: number };
-    } = {};
+    let p1Wins = 0,
+      p2Wins = 0;
+    const surfaceStats: Record<
+      string,
+      { p1Wins: number; p2Wins: number; total: number }
+    > = {};
 
     matchHistory.forEach((match) => {
       const surface = match.surface || "Unknown";
-      if (!surfaceStats[surface]) {
-        surfaceStats[surface] = { p1Wins: 0, p2Wins: 0, total: 0 };
-      }
+      surfaceStats[surface] ??= { p1Wins: 0, p2Wins: 0, total: 0 };
       surfaceStats[surface].total++;
 
       if (match.winner_name === p1FullName) {
@@ -314,28 +147,26 @@ export default function PlayerComparisonPage() {
     });
 
     const totalMatches = p1Wins + p2Wins;
-    const p1WinRate =
-      totalMatches > 0 ? ((p1Wins / totalMatches) * 100).toFixed(1) : "N/A";
-    const p2WinRate =
-      totalMatches > 0 ? ((p2Wins / totalMatches) * 100).toFixed(1) : "N/A";
+    const p1WinRate = totalMatches
+      ? ((p1Wins / totalMatches) * 100).toFixed(1)
+      : "N/A";
+    const p2WinRate = totalMatches
+      ? ((p2Wins / totalMatches) * 100).toFixed(1)
+      : "N/A";
 
     const formattedSurfaceStats = Object.entries(surfaceStats).map(
       ([surface, stats]) => {
         const surfaceTotal = stats.p1Wins + stats.p2Wins;
-        const p1SurfaceWinRate =
-          surfaceTotal > 0
-            ? ((stats.p1Wins / surfaceTotal) * 100).toFixed(1)
-            : "N/A";
-        const p2SurfaceWinRate =
-          surfaceTotal > 0
-            ? ((stats.p2Wins / surfaceTotal) * 100).toFixed(1)
-            : "N/A";
         return {
           surface,
           p1Wins: stats.p1Wins,
           p2Wins: stats.p2Wins,
-          p1SurfaceWinRate,
-          p2SurfaceWinRate,
+          p1SurfaceWinRate: surfaceTotal
+            ? ((stats.p1Wins / surfaceTotal) * 100).toFixed(1)
+            : "N/A",
+          p2SurfaceWinRate: surfaceTotal
+            ? ((stats.p2Wins / surfaceTotal) * 100).toFixed(1)
+            : "N/A",
           surfaceTotal,
         };
       },
@@ -352,44 +183,46 @@ export default function PlayerComparisonPage() {
   };
 
   const headToHeadStats = calculateHeadToHeadStats();
+  const loadingRankingHistory = loadingRank1 || loadingRank2;
 
   return (
     <div className="container mx-auto p-4 md:p-8 min-h-screen font-sans text-white">
-      <h1 className="text-4xl font-extrabold mb-10 text-center text-white">
+      <h1 className="text-4xl font-extrabold mb-10 text-center">
         Tennis Player Data Analysis
       </h1>
+
+      {/* Player selectors */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div>
-          <h2 className="text-xl font-bold mb-3 text-center">Player 1</h2>
-          <PlayerSearchInput
-            onSelectPlayer={setPlayer1}
-            selectedPlayer={player1}
-            placeholder="Search for Player 1"
-          />
-        </div>
-        <div>
-          <h2 className="text-xl font-bold mb-3 text-center">Player 2</h2>
-          <PlayerSearchInput
-            onSelectPlayer={setPlayer2}
-            selectedPlayer={player2}
-            placeholder="Search for Player 2"
-          />
-        </div>
+        {[
+          { title: "Player 1", player: player1, set: setPlayer1 },
+          { title: "Player 2", player: player2, set: setPlayer2 },
+        ].map(({ title, player, set }, i) => (
+          <div key={i}>
+            <h2 className="text-xl font-bold mb-3 text-center">{title}</h2>
+            <PlayerSearchInput
+              onSelectPlayer={set}
+              selectedPlayer={player}
+              placeholder={`Search for ${title}`}
+            />
+          </div>
+        ))}
       </div>
 
+      {/* Profiles */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
         <PlayerProfileCard player={player1Details} title="Player 1 Profile" />
         <PlayerProfileCard player={player2Details} title="Player 2 Profile" />
       </div>
 
+      {/* Stats */}
       <PlayerStatsComparisonPieCharts
         player1Details={player1Details}
         player2Details={player2Details}
       />
 
+      {/* Ranking */}
       {(player1Details || player2Details) &&
-        (player1RankingHistory.length > 0 ||
-          player2RankingHistory.length > 0) && (
+        (player1RankingHistory.length || player2RankingHistory.length) > 0 && (
           <PlayerRankingSection
             player1Name={
               player1Details
@@ -407,12 +240,13 @@ export default function PlayerComparisonPage() {
           />
         )}
 
+      {/* Head-to-head */}
       <HeadToHeadSection
         player1Details={player1Details}
         player2Details={player2Details}
         matchHistory={matchHistory}
         loading={loadingMatches}
-        headToHeadStats={headToHeadStats} // Pass the calculated stats
+        headToHeadStats={headToHeadStats}
       />
     </div>
   );

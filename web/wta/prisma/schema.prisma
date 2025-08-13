@@ -1,98 +1,114 @@
-  generator client {
-    provider = "prisma-client-js"
-    output   = "../lib/generated/prisma"
-  }
+generator client {
+  provider = "prisma-client-js"
+  output   = "../lib/generated/prisma"
+}
 
-  datasource db {
-    provider = "postgresql"
-    url      = env("DATABASE_URL")
-  }
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
 
-  model players {
-    player_id                  Int                @id(map: "players_pk")
-    name_first                 String?
-    name_last                  String?
-    hand                       String?
-    dob                        DateTime?          @db.Date
-    ioc                        String?
-    height                     Int?
-    wikidata_id                String?
-    ranking_100                ranking_100[]
-    wta_wta_winner_idToplayers wta[]              @relation("wta_winner_idToplayers")
-    wta_wta_loser_idToplayers  wta[]              @relation("wta_loser_idToplayers")
-    ace_avg_last_10_matches    Float?
-    df_avg_last_10_matches     Float?
-    first_in_avg_last_10_matches Float?
-    first_won_avg_last_10_matches Float?
-    svpt_avg_last_10_matches   Float?
-    bp_faced_avg_last_10_matches Float?
-    bp_saved_avg_last_10_matches Float?
-    win_rate_last_10_matches   Float?
-  }
+model players {
+  player_id                     Int           @id(map: "players_pk")
+  name_first                    String?
+  name_last                     String?
+  hand                          String?
+  dob                           DateTime?     @db.Date
+  ioc                           String?
+  height                        Int?
+  wikidata_id                   String?
+  ace_avg_last_10_matches       Decimal?      @db.Decimal(5, 2)
+  df_avg_last_10_matches        Decimal?      @db.Decimal(5, 2)
+  first_in_avg_last_10_matches  Decimal?      @db.Decimal(5, 2)
+  first_won_avg_last_10_matches Decimal?      @db.Decimal(5, 2)
+  svpt_avg_last_10_matches      Decimal?      @db.Decimal(6, 2)
+  bp_faced_avg_last_10_matches  Decimal?      @db.Decimal(6, 2)
+  bp_saved_avg_last_10_matches  Decimal?      @db.Decimal(6, 2)
+  win_rate_last_10_matches      Decimal?      @db.Decimal(4, 2)
+  ranking_100                   ranking_100[]
+  wta_wta_winner_idToplayers    wta[]         @relation("wta_winner_idToplayers")
+  wta_wta_loser_idToplayers     wta[]         @relation("wta_loser_idToplayers")
+}
 
-  model ranking_100 {
-    ranking_date String?
-    rank         Int?
-    player       Int?
-    points       Int?
-    tours        Int?
-    id           Int      @id @default(autoincrement())
-    players      players? @relation(fields: [player], references: [player_id], onDelete: NoAction, onUpdate: NoAction, map: "ranking_100_players_player_id_fk")
-  }
+model ranking_100 {
+  ranking_date String?
+  rank         Int?
+  player       Int?
+  points       Int?
+  tours        Int?
+  id           Int      @id @default(autoincrement())
+  players      players? @relation(fields: [player], references: [player_id], onDelete: NoAction, onUpdate: NoAction, map: "ranking_100_players_player_id_fk")
+}
 
-  model wta {
-    tourney_id                     String?   @db.VarChar(20)
-    tourney_name                   String?
-    surface                        String?   @db.VarChar(10)
-    draw_size                      Int?
-    tourney_level                  String?   @db.VarChar(5)
-    tourney_date                   DateTime? @db.Date
-    match_num                      Int?
-    winner_id                      Int?
-    winner_seed                    Int?
-    winner_entry                   String?   @db.VarChar(5)
-    winner_name                    String?   @db.VarChar(100)
-    winner_hand                    String?   @db.Char(1)
-    winner_ht                      Int?
-    winner_ioc                     String?   @db.Char(3)
-    winner_age                     Decimal?  @db.Decimal(4, 1)
-    loser_id                       Int?
-    loser_seed                     Int?
-    loser_entry                    String?   @db.VarChar(5)
-    loser_name                     String?   @db.VarChar(100)
-    loser_hand                     String?   @db.Char(1)
-    loser_ht                       Int?
-    loser_ioc                      String?   @db.Char(3)
-    loser_age                      Decimal?  @db.Decimal(4, 1)
-    score                          String?   @db.VarChar(50)
-    best_of                        Int?
-    round                          String?   @db.VarChar(10)
-    minutes                        Int?
-    w_ace                          Int?
-    w_df                           Int?
-    w_svpt                         Int?
-    w_1stin                        Int?
-    w_1stwon                       Int?
-    w_2ndwon                       Int?
-    w_svgms                        Int?
-    w_bpsaved                      Int?
-    w_bpfaced                      Int?
-    l_ace                          Int?
-    l_df                           Int?
-    l_svpt                         Int?
-    l_1stin                        Int?
-    l_1stwon                       Int?
-    l_2ndwon                       Int?
-    l_svgms                        Int?
-    l_bpsaved                      Int?
-    l_bpfaced                      Int?
-    winner_rank                    Int?
-    winner_rank_points             Int?
-    loser_rank                     Int?
-    loser_rank_points              Int?
-    data_from                      String?   @db.VarChar(20)
-    year                           Int?
-    id                             Int       @id @default(autoincrement())
-    players_wta_winner_idToplayers players?  @relation("wta_winner_idToplayers", fields: [winner_id], references: [player_id], onDelete: NoAction, onUpdate: NoAction, map: "wta_players_player_id_fk")
-    players_wta_loser_idToplayers  players?  @relation("wta_loser_idToplayers", fields: [loser_id], references: [player_id], onDelete: NoAction, onUpdate: NoAction, map: "wta_players_player_id_fk_2")
-  }
+model wta {
+  tourney_id                     String?   @db.VarChar(20)
+  tourney_name                   String?
+  surface                        String?   @db.VarChar(10)
+  draw_size                      Int?
+  tourney_level                  String?   @db.VarChar(5)
+  tourney_date                   DateTime? @db.Date
+  match_num                      Int?
+  winner_id                      Int?
+  winner_seed                    Int?
+  winner_entry                   String?   @db.VarChar(5)
+  winner_name                    String?   @db.VarChar(100)
+  winner_hand                    String?   @db.Char(1)
+  winner_ht                      Int?
+  winner_ioc                     String?   @db.Char(3)
+  winner_age                     Decimal?  @db.Decimal(4, 1)
+  loser_id                       Int?
+  loser_seed                     Int?
+  loser_entry                    String?   @db.VarChar(5)
+  loser_name                     String?   @db.VarChar(100)
+  loser_hand                     String?   @db.Char(1)
+  loser_ht                       Int?
+  loser_ioc                      String?   @db.Char(3)
+  loser_age                      Decimal?  @db.Decimal(4, 1)
+  score                          String?   @db.VarChar(50)
+  best_of                        Int?
+  round                          String?   @db.VarChar(10)
+  minutes                        Int?
+  w_ace                          Int?
+  w_df                           Int?
+  w_svpt                         Int?
+  w_1stin                        Int?
+  w_1stwon                       Int?
+  w_2ndwon                       Int?
+  w_svgms                        Int?
+  w_bpsaved                      Int?
+  w_bpfaced                      Int?
+  l_ace                          Int?
+  l_df                           Int?
+  l_svpt                         Int?
+  l_1stin                        Int?
+  l_1stwon                       Int?
+  l_2ndwon                       Int?
+  l_svgms                        Int?
+  l_bpsaved                      Int?
+  l_bpfaced                      Int?
+  winner_rank                    Int?
+  winner_rank_points             Int?
+  loser_rank                     Int?
+  loser_rank_points              Int?
+  data_from                      String?   @db.VarChar(20)
+  year                           Int?
+  id                             Int       @id @default(autoincrement())
+  players_wta_winner_idToplayers players?  @relation("wta_winner_idToplayers", fields: [winner_id], references: [player_id], onDelete: NoAction, onUpdate: NoAction, map: "wta_players_player_id_fk")
+  players_wta_loser_idToplayers  players?  @relation("wta_loser_idToplayers", fields: [loser_id], references: [player_id], onDelete: NoAction, onUpdate: NoAction, map: "wta_players_player_id_fk_2")
+}
+
+model player_elo {
+  id             Int      @id @default(autoincrement())
+  player_id      Int
+  date           DateTime @db.Date
+  elo_rating     Float?
+  elo_rating_wt1 Float?
+  elo_hard       Float?
+  elo_clay       Float?
+  elo_grass      Float?
+  elo_wt1_hard   Float?
+  elo_wt1_clay   Float?
+  elo_wt1_grass  Float?
+
+  @@index([player_id], map: "player_elo_player_id_index")
+}
