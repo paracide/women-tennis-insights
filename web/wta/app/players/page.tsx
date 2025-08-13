@@ -5,7 +5,7 @@ import { PlayerSearchInput } from "@/components/players/player-search-input";
 import { PlayerProfileCard } from "@/components/players/player-profile-card";
 import { PlayerRankingSection } from "@/components/players/player-ranking-section";
 import { HeadToHeadSection } from "@/components/players/head-to-head-section";
-import { PlayerStatsComparisonPieCharts } from "@/components/players/player-stats-comparison-pie-charts"; // New import
+import { PlayerStatsComparisonPieCharts } from "@/components/players/player-stats-comparison-pie-charts";
 
 interface PlayerBasicInfo {
   player_id: number;
@@ -360,7 +360,7 @@ export default function PlayerComparisonPage() {
       </h1>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
         <div>
-          <h2 className="text-xl font-semibold mb-3">Player 1</h2>
+          <h2 className="text-xl font-bold mb-3 text-center">Player 1</h2>
           <PlayerSearchInput
             onSelectPlayer={setPlayer1}
             selectedPlayer={player1}
@@ -368,7 +368,7 @@ export default function PlayerComparisonPage() {
           />
         </div>
         <div>
-          <h2 className="text-xl font-semibold mb-3">Player 2</h2>
+          <h2 className="text-xl font-bold mb-3 text-center">Player 2</h2>
           <PlayerSearchInput
             onSelectPlayer={setPlayer2}
             selectedPlayer={player2}
@@ -376,12 +376,6 @@ export default function PlayerComparisonPage() {
           />
         </div>
       </div>
-
-      {loadingDetails && (player1 || player2) && (
-        <div className="text-center text-lg text-blue-600 mb-8 animate-pulse">
-          Loading player details...
-        </div>
-      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
         <PlayerProfileCard player={player1Details} title="Player 1 Profile" />

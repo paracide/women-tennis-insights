@@ -95,8 +95,14 @@ export function PlayerSearchInput({
           className="pr-10"
         />
         {selectedPlayer && (
-          <Button color="default" variant="shadow" onPress={handleClear}>
-            Clear search
+          <Button
+            className="bg-linear-to-tr from-pink-500 to-yellow-500 text-white shadow-lg"
+            radius="full"
+            color="default"
+            variant="shadow"
+            onPress={handleClear}
+          >
+            Clear
           </Button>
         )}
       </div>

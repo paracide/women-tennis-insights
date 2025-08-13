@@ -42,7 +42,11 @@ export function PlayerProfileCard({ player, title }: PlayerProfileCardProps) {
 
   return (
     <Card className="flex-1 min-w-[300px] shadow-lg">
-      <CardHeader>{title}</CardHeader>
+      <CardHeader className="justify-center">
+        {player
+          ? player.name_first + " " + player.name_last + ` Profile`
+          : title}
+      </CardHeader>
       <CardBody className="p-6">
         {player ? (
           <div className="space-y-3 text-sm text-white">
