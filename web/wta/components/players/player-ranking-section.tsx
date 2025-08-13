@@ -1,4 +1,4 @@
-import { Card, CardBody, CardHeader } from "@heroui/card";
+import { Card, CardBody } from "@heroui/card";
 import { PlayerRankingChart } from "@/components/players/player-ranking-chart";
 
 interface RankingData {
@@ -24,7 +24,9 @@ export function PlayerRankingSection({
 }: PlayerRankingSectionProps) {
   return (
     <Card className="mb-10">
-      <CardHeader className="text-white">Historical Ranking Trend</CardHeader>
+      <h2 className=" text-2xl font-bold text-center text-white p-4">
+        Historical Ranking Trend
+      </h2>
       <CardBody className="p-6">
         {loading ? (
           <div className="text-center text-lg text-blue-600 animate-pulse">

@@ -5,7 +5,7 @@ interface EloPredictionCardProps {
 export function EloPredictionCard({ prediction }: EloPredictionCardProps) {
   return (
     <div className="mb-6 p-4 rounded-lg shadow-sm">
-      <h3 className="font-bold text-base mb-2 text-center">
+      <h3 className="font-bold text-2xl mb-2 text-center">
         Elo Predicted Win Rate
       </h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 items-center text-center">

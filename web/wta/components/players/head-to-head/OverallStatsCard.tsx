@@ -20,13 +20,9 @@ export function OverallStatsCard({
 }: OverallStatsCardProps) {
   return (
     <div className="mb-6 p-4 rounded-lg shadow-sm ">
-      <h3 className="font-bold text-base mb-2 text-center">
+      <h3 className="font-bold text-2xl mb-2 text-center">
         Overall Head-to-Head
       </h3>
-      <p className="mb-2">
-        Total Matches:{" "}
-        <span className="font-semibold">{headToHeadStats.totalMatches}</span>
-      </p>
 
       <div className="grid grid-cols-2 gap-4 mb-4">
         <div>
@@ -59,7 +55,7 @@ export function OverallStatsCard({
 
       {headToHeadStats.surfaceStats.length > 0 && (
         <>
-          <h3 className="font-bold text-base mb-2 text-center">
+          <h3 className="font-bold text-2xl mb-2 text-center">
             Win Rate by Surface
           </h3>
           <Table className="w-full text-sm">
