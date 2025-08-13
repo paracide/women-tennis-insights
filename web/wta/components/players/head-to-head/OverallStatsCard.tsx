@@ -19,7 +19,7 @@ export function OverallStatsCard({
   player2Name,
 }: OverallStatsCardProps) {
   return (
-    <div className="mb-6 p-4 border rounded-lg shadow-sm bg-white">
+    <div className="mb-6 p-4 rounded-lg shadow-sm ">
       <h3 className="font-bold text-base mb-2 text-center">
         Overall Head-to-Head
       </h3>

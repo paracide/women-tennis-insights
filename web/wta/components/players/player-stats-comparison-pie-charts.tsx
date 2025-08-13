@@ -102,32 +102,25 @@ export function PlayerStatsComparisonPieCharts({
     p2Value: number | null,
     isPercentage = false,
   ) => {
-    if (p1Value === null || p2Value === null) return;
+    let val1 = p1Value ?? 0;
+    let val2 = p2Value ?? 0;
 
-    let val1 = p1Value;
-    let val2 = p2Value;
-
-    // If it's a percentage (0-1 range), convert to actual percentage points for display
     if (isPercentage) {
-      val1 = p1Value * 100;
-      val2 = p2Value * 100;
+      val1 = val1 * 100;
+      val2 = val2 * 100;
     }
 
-    const total = val1 + val2;
-
-    if (total > 0) {
-      charts.push(
-        <div key={title} className="w-full md:w-1/2 lg:w-1/3 p-2">
-          <ReactECharts
-            option={getPieOption(title, [
-              { value: val1, name: p1Name },
-              { value: val2, name: p2Name },
-            ])}
-            style={{ height: "250px", width: "100%" }}
-          />
-        </div>,
-      );
-    }
+    charts.push(
+      <div key={title} className="w-full md:w-1/2 lg:w-1/3 p-2">
+        <ReactECharts
+          option={getPieOption(title, [
+            { value: val1, name: p1Name },
+            { value: val2, name: p2Name },
+          ])}
+          style={{ height: "250px", width: "100%" }}
+        />
+      </div>,
+    );
   };
 
   // Add charts for each comparable statistic
@@ -169,19 +162,12 @@ export function PlayerStatsComparisonPieCharts({
     player2Details.bp_faced_avg_last_10_matches,
   );
 
-  addChart(
-    "Break Points Saved (Last 10 Matches)",
-    player1Details.bp_saved_avg_last_10_matches,
-    player2Details.bp_saved_avg_last_10_matches,
-  );
-
-  // SVPT Avg is not suitable for a direct pie chart comparison as it's an average, not a sum of parts.
-
   return (
     <Card className="mb-10 shadow-lg">
-      <CardHeader className="text-white">
+      <h2 className="text-2xl font-bold text-center text-white">
         Player Statistics Comparison
-      </CardHeader>
+      </h2>
+
       <CardBody className="p-6">
         <div className="flex flex-wrap -m-2">
           {charts.length > 0 ? (

@@ -7,7 +7,7 @@ interface HeadToHeadSectionProps {
   player1Details: PlayerDetails | undefined;
   player2Details: PlayerDetails | undefined;
   matchHistory: Match[];
-  prediction: EloPrediction | null;
+  prediction: EloPrediction | undefined;
   loading: boolean;
   headToHeadStats: HeadToHeadStats | null;
 }
